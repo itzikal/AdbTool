@@ -7,6 +7,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 
+import adbTool.ADBLogcat;
 import adbTool.ADBWrapper;
 import adbTool.UnreachableCodeException;
 import adbTool.interfaces.OnListChangeListener;
@@ -23,7 +24,7 @@ public class LogcatTableModel extends AbstractTableModel implements OnListChange
 	
 	public LogcatTableModel()
 	{
-		ADBWrapper.getInstance().setOnListChangeListener(this);
+		ADBLogcat.getInstance().setOnListChangeListener(this);
 	}
 	
 	@Override

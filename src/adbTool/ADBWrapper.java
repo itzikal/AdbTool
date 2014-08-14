@@ -15,11 +15,7 @@ import adbTool.models.LogcatLevel;
 public class ADBWrapper 
 {
 	private static ADBWrapper _instance;
-	private final DefaultListModel<LogcatItem> _logcat = new DefaultListModel<LogcatItem>();
-	private Thread _logcatThread;
-	private Process _process;
-	private OnListChangeListener _listChangeListener;
-
+	
 	protected ADBWrapper()
 	{
 	}
@@ -32,100 +28,6 @@ public class ADBWrapper
 		}
 		return _instance;
 	} 
-
-	public void startProcess(LogcatLevel level)
-	{
-//		ArrayList<String> packages = getInstallPackeages();
-//		for(String p : packages)
-//		{
-//			excuteADBCommand("shell", "pull", p);
-//		}
-	//	String s= getPID("zemingo.com.bluetoothserver");
-		Close();
-	//	_logcat.clear();
-		//_process = executeLogcatCommand("-v", "time" );
-		_process = executeLogcatCommand("*:" + level.getLetter());
-		_logcatThread =	new Thread(new Runnable() 
-		{
-			@Override
-			public void run() 
-			{
-				while(true)
-				{
-					String s  = getLine();
-					System.out.println(s);
-					if(s==null)
-					{
-						try 
-						{
-							//System.out.println("line was empty, sleep 200ms");
-							Thread.sleep(200);
-						}
-						catch (InterruptedException e) 
-						{
-
-						}
-						continue;
-					}
-
-					if(s!=null && !s.isEmpty())
-					{
-						LogcatItem item =  new LogcatItem(s);//LogcatLevel.Debug , "app", "tag", s);
-					//	_logcat.addElement(item);
-						_listChangeListener.itemAdded(item);
-					}
-				}
-			}
-		});
-		_logcatThread.start(); 
-	}
-
-//	public DefaultListModel<LogcatItem> getLogcatList()
-//	{
-//		return _logcat;
-//	}
-
-	public void setOnListChangeListener(OnListChangeListener onListChangeListener)
-	{
-		_listChangeListener = onListChangeListener;
-	}
-	
-	private String getLine()
-	{
-		InputStream is = _process.getInputStream();
-		InputStreamReader isr = new InputStreamReader(is);
-		BufferedReader bufferdreader= new BufferedReader(isr);
-		try 
-		{
-			return  bufferdreader.readLine();
-		}
-		catch (IOException e) 
-		{
-		}
-
-		return null;
-	}	
-
-	public void Close()
-	{
-		_listChangeListener.listCleared();
-		if(_logcatThread != null)
-		{
-			_logcatThread.interrupt();
-		}
-
-		if(_process !=null)
-		{
-			try
-			{
-				_process.destroy();
-			} 
-			catch (Exception e) 
-			{
-				e.printStackTrace();
-			}
-		}
-	}
 
 	public void restartServer()
 	{
@@ -140,14 +42,7 @@ public class ADBWrapper
 		}
 	}
 
-	public void clearLogcat()
-	{
-		executeLogcatCommand("-c");
-		_listChangeListener.listCleared();
-	//	_logcat.clear();
-	}
-
-	private Process excuteADBCommand(String... args)
+	public Process excuteADBCommand(String... args)
 	{
 		String [] commands = new String[args.length+1];
 		commands[0] = "adb";
@@ -169,19 +64,6 @@ public class ADBWrapper
 		return proc;
 	}
 
-	private Process executeLogcatCommand(String... args)
-	{
-		String [] commands = new String[args.length+1];
-		commands[0] = "logcat";
-		int i = 1;
-		for(String arg : args)
-		{
-			commands[i] = arg;
-			i++;
-		}
-		return excuteADBCommand(commands);
-
-	}
 
 	
 	private ArrayList<String> getInstallPackeages()
@@ -260,5 +142,10 @@ public class ADBWrapper
 			}
 		
 		return s;
+	}
+	
+	public void installApk(String filename)
+	{
+		excuteADBCommand(filename);
 	}
 }

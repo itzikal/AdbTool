@@ -9,6 +9,7 @@ import javax.swing.JTable;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import adbTool.ADBLogcat;
 import adbTool.ADBWrapper;
 import adbTool.models.LogcatLevel;
 
@@ -59,7 +60,7 @@ public class ADBFrame extends javax.swing.JFrame {
 			public void actionPerformed(ActionEvent arg0) 
 			{
 				LogcatLevel x = (LogcatLevel)_logcatLevelComboBox.getSelectedItem();
-				ADBWrapper.getInstance().startProcess(x);
+				ADBLogcat.getInstance().startLogcat(x);
 				
 			}
 		});
@@ -92,7 +93,15 @@ public class ADBFrame extends javax.swing.JFrame {
         jScrollPane1.setViewportView(jList1);
 
         _installAPKButoon.setText("Install APK");
-
+        _installAPKButoon.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) 
+			{
+				ChooseAndInstallAPKDialog dialog = new ChooseAndInstallAPKDialog(ADBFrame.this, true);
+				dialog.run();
+			}
+		});
         _restatADBServer.setText("Restart ADB");
         _restatADBServer.setToolTipText("");
 
@@ -147,9 +156,10 @@ public class ADBFrame extends javax.swing.JFrame {
         _saveLogcatButton.addActionListener(new ActionListener() {
 			
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
-				ADBWrapper.getInstance().startProcess(LogcatLevel.Debug);
+			public void actionPerformed(ActionEvent arg0) 
+			{
+				//TODO: Change Button Name or Button functionality 
+				ADBLogcat.getInstance().startLogcat((LogcatLevel)_logcatLevelComboBox.getSelectedItem());
 			}
 		});
         
@@ -161,7 +171,7 @@ public class ADBFrame extends javax.swing.JFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				ADBWrapper.getInstance().clearLogcat();
+				ADBLogcat.getInstance().clearLogcat();
 				
 			}
 		});
