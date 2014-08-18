@@ -1,5 +1,16 @@
 package adbTool.ui;
 
+import java.awt.FileDialog;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+
+import javax.swing.Action;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 public class ChooseAndInstallAPKDialog extends javax.swing.JDialog {
 
 	/**
@@ -29,11 +40,36 @@ public class ChooseAndInstallAPKDialog extends javax.swing.JDialog {
 		setResizable(false);
 
 		_cancle.setText("Cancel");
-
+		_cancle.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent arg0) 
+			{
+				ChooseAndInstallAPKDialog.this.setVisible(false);
+			}
+		});
 		_install.setText("Install");
 
 		_browse.setText("browse");
+		_browse.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				JFileChooser fc = new  JFileChooser();
+				FileFilter apkfilter = new FileNameExtensionFilter("Apk Files", "apk");
+				fc.setFileFilter(apkfilter);
+				fc.setAcceptAllFileFilterUsed(false);
+				if(fc.showOpenDialog(ChooseAndInstallAPKDialog.this) == JFileChooser.APPROVE_OPTION)
+				{
+					File file = fc.getSelectedFile();
+					_filename.setText(file.getPath());
+					System.out.println("getAbsolutePath " + file.getAbsolutePath());
+					System.out.println("path: " + file.getPath());
 
+					System.out.println("getName: "+file.getName());
+				}
+			}
+		});
 		_filename.setToolTipText("");
 
 		jLabel1.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
