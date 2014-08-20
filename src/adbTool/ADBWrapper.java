@@ -5,19 +5,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-
-import javax.swing.DefaultListModel;
-
-import adbTool.interfaces.OnListChangeListener;
-import adbTool.models.LogcatItem;
-import adbTool.models.LogcatLevel;
+import java.util.concurrent.TimeUnit;
 
 public class ADBWrapper 
 {
 	private static ADBWrapper _instance;
-	
-	protected ADBWrapper()
+    public String mPagkage;
+    public String mPid;
+
+    protected ADBWrapper()
 	{
+        getActivePackageAndPid();
 	}
 
 	public static ADBWrapper getInstance() 
@@ -33,8 +31,8 @@ public class ADBWrapper
 	{
 		try
 		{
-			excuteADBCommand("kill-server").wait();
-			excuteADBCommand("start-server");
+			executeADBCommand("kill-server").wait();
+			executeADBCommand("start-server");
 		} 
 		catch (InterruptedException e) 
 		{
@@ -42,7 +40,7 @@ public class ADBWrapper
 		}
 	}
 
-	public Process excuteADBCommand(String... args)
+	public Process executeADBCommand(String... args)
 	{
 		String [] commands = new String[args.length+1];
 		commands[0] = "adb";
@@ -70,7 +68,7 @@ public class ADBWrapper
 	{
 
 		ArrayList<String> l = new ArrayList<String>();
-		Process p = excuteADBCommand("shell", "pm", "list", "packages", "-3");
+		Process p = executeADBCommand("shell", "pm", "list", "packages", "-3");
 		InputStream is = p.getInputStream();
 		InputStreamReader isr = new InputStreamReader(is);
 		BufferedReader bufferdreader= new BufferedReader(isr);
@@ -94,11 +92,12 @@ public class ADBWrapper
 		}
 		return l;
 	}
+
 	private ArrayList<String> getInstallAPKPackeages()
 	{
 
 		ArrayList<String> l = new ArrayList<String>();
-		Process p = excuteADBCommand("shell", "pm", "list", "packages", "-f");
+		Process p = executeADBCommand("shell", "pm", "list", "packages", "-f");
 		InputStream is = p.getInputStream();
 		InputStreamReader isr = new InputStreamReader(is);
 		BufferedReader bufferdreader= new BufferedReader(isr);
@@ -127,7 +126,7 @@ public class ADBWrapper
 	{
 
 	String s = null;
-		Process p = excuteADBCommand("shell", "ps | grep "+packageName+" |gawk '{print $2}'");
+		Process p = executeADBCommand("shell", "ps | grep " + packageName + " |gawk '{print $2}'");
 		InputStream is = p.getInputStream();
 		InputStreamReader isr = new InputStreamReader(is);
 		BufferedReader bufferdreader= new BufferedReader(isr);
@@ -143,9 +142,40 @@ public class ADBWrapper
 		
 		return s;
 	}
-	
+
+    private void getActivePackageAndPid()
+    {
+
+        String s = null;
+        Process p = executeADBCommand("shell", "dumpsys activity | grep top-activity");
+        InputStream is = p.getInputStream();
+        InputStreamReader isr = new InputStreamReader(is);
+        BufferedReader bufferdreader= new BufferedReader(isr);
+        try
+
+        {
+            s =   bufferdreader.readLine();
+        }
+        catch(Exception e)
+        {
+
+        }
+
+        try
+        {
+            p.waitFor(1000, TimeUnit.MILLISECONDS);
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+
+        mPagkage = s.substring(s.lastIndexOf(":") +1, s.lastIndexOf("/"));
+        mPid = s.substring(s.indexOf("trm:")+"trm: 0 ".length(), s.lastIndexOf(":"));
+    }
+
 	public void installApk(String filename)
 	{
-		excuteADBCommand(filename);
+		executeADBCommand(filename);
 	}
 }

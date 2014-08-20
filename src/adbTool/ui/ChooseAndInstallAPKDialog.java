@@ -91,7 +91,7 @@ public class ChooseAndInstallAPKDialog extends javax.swing.JDialog
         _install.setText("Install");
         _install.addActionListener(actionEvent ->
         {
-            Process installProcess = ADBWrapper.getInstance().excuteADBCommand("install", _filename.getText());
+            Process installProcess = ADBWrapper.getInstance().executeADBCommand("install", _filename.getText());
         });
     }
 

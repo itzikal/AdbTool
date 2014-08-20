@@ -2,10 +2,7 @@ package adbTool.ui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeListener;
 
-import javax.swing.Action;
-import javax.swing.JTable;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -30,7 +27,7 @@ public class ADBFrame extends javax.swing.JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
     private void initComponents() {
-
+        ADBWrapper.getInstance();
         _topPanle = new javax.swing.JPanel();
         _rigthPanel = new javax.swing.JPanel();
         _removeCommandButton = new javax.swing.JButton();
