@@ -92,18 +92,6 @@ public class ChooseAndInstallAPKDialog extends javax.swing.JDialog
         _install.addActionListener(actionEvent ->
         {
             Process installProcess = ADBWrapper.getInstance().excuteADBCommand("install", _filename.getText());
-            ProgressBar p = new ProgressBar();
-            p.run();
-            try
-            {
-                installProcess.waitFor();
-            }
-            catch (InterruptedException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            p.close();
         });
     }
 
