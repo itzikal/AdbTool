@@ -32,28 +32,28 @@ public enum LogcatLevel
 		return _letter;
 	}
 	
-	
-	public static LogcatLevel convert(String name)
-	{
-		switch (name) 
-		{
-		case "Verbose":
-			return LogcatLevel.Verbose;
-		case "Debug":
-			return LogcatLevel.Debug; 
-		case "Info":
-			return LogcatLevel.Info; 
-		case "Warnning":
-			return LogcatLevel.Warnning;
-		case "Error":
-			return LogcatLevel.Error; 
-		case "Asset":
-			return LogcatLevel.Asset; 
-		default:
-			return LogcatLevel.Unknown;
-		}
-		
-	}
+//
+//	public static LogcatLevel convert(String name)
+//	{
+//		switch (name)
+//		{
+//		case "Verbose":
+//			return LogcatLevel.Verbose;
+//		case "Debug":
+//			return LogcatLevel.Debug;
+//		case "Info":
+//			return LogcatLevel.Info;
+//		case "Warnning":
+//			return LogcatLevel.Warnning;
+//		case "Error":
+//			return LogcatLevel.Error;
+//		case "Asset":
+//			return LogcatLevel.Asset;
+//		default:
+//			return LogcatLevel.Unknown;
+//		}
+//
+//	}
 	
 	public static LogcatLevel convert(char letter)
 	{

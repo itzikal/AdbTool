@@ -25,7 +25,7 @@ public class LogcatTable  extends JTable
 	
 	public LogcatTable()
 	{
-	
+	//	setAutoResizeMode(AUTO_RESIZE_ALL_COLUMNS);
 	}
 	
 	@Override
