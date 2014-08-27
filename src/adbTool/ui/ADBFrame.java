@@ -25,7 +25,6 @@ public class ADBFrame extends javax.swing.JFrame {
         _logcatLevelComboBox.addActionListener(arg0 -> {
             LogcatLevel x = (LogcatLevel)_logcatLevelComboBox.getSelectedItem();
             ADBLogcat.getInstance().startLogcat(x);
-
         });
 
         _installAPKButoon.addActionListener(arg0 -> {
@@ -51,6 +50,8 @@ public class ADBFrame extends javax.swing.JFrame {
                 //   _logcatTable.setFilter(_filterTextBox.getText().toString());
             }
         });
+
+        _sendTextButton.addActionListener(arg0 -> new SendTextDialog(ADBFrame.this, true).run());
     }
 
     private void filterTextBoxActionPerformed(java.awt.event.ActionEvent evt){
