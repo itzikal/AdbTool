@@ -1,8 +1,6 @@
 package adbTool.ui;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
+import javax.swing.JComboBox;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -15,55 +13,29 @@ public class ADBFrame extends javax.swing.JFrame {
      * Creates new form ADBFrame
      */
     public ADBFrame() {
+        _logcatLevelComboBox = new JComboBox<LogcatLevel>(LogcatLevel.getValues());
         initComponents();
         setActions();
     }
 
     private void setActions()
     {
-        _saveLogcatButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0)
-            {
-                //TODO: Change Button Name or Button functionality
-                ADBLogcat.getInstance().startLogcat((LogcatLevel)_logcatLevelComboBox.getSelectedItem());
-            }
+        _startLogcat.addActionListener(arg0 -> ADBLogcat.getInstance().startLogcat((LogcatLevel)_logcatLevelComboBox.getSelectedItem()));
+
+        _logcatLevelComboBox.addActionListener(arg0 -> {
+            LogcatLevel x = (LogcatLevel)_logcatLevelComboBox.getSelectedItem();
+            ADBLogcat.getInstance().startLogcat(x);
+
         });
 
-        _logcatLevelComboBox.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent arg0)
-            {
-                LogcatLevel x = (LogcatLevel)_logcatLevelComboBox.getSelectedItem();
-                ADBLogcat.getInstance().startLogcat(x);
-
-            }
+        _installAPKButoon.addActionListener(arg0 -> {
+            ChooseAndInstallAPKDialog dialog = new ChooseAndInstallAPKDialog(ADBFrame.this, true);
+            dialog.run();
         });
 
-        _installAPKButoon.addActionListener(new ActionListener()
-        {
+        _clearLogcatButton.addActionListener(arg0 -> ADBLogcat.getInstance().clearLogcat());
 
-            @Override
-            public void actionPerformed(ActionEvent arg0)
-            {
-                ChooseAndInstallAPKDialog dialog = new ChooseAndInstallAPKDialog(ADBFrame.this, true);
-                dialog.run();
-            }
-        });
-
-        _clearLogcatButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                ADBLogcat.getInstance().clearLogcat();
-            }
-        });
-
-        _filterTextBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                filterTextBoxActionPerformed(evt);
-            }
-        });
+        _filterTextBox.addActionListener(evt -> filterTextBoxActionPerformed(evt));
 
         _filterTextBox.getDocument().addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent e) {
@@ -84,6 +56,7 @@ public class ADBFrame extends javax.swing.JFrame {
     private void filterTextBoxActionPerformed(java.awt.event.ActionEvent evt){
 
     }
+
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
 
@@ -98,14 +71,14 @@ public class ADBFrame extends javax.swing.JFrame {
         _topPanle = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         _packagesCombobox = new javax.swing.JComboBox();
-        _clearLogcatButton = new javax.swing.JButton();
-        _saveLogcatButton = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
-        _logcatLevelComboBox = new javax.swing.JComboBox();
         jLabel3 = new javax.swing.JLabel();
         _filterTextBox = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         _activePackageName = new javax.swing.JLabel();
+        _startLogcat = new javax.swing.JButton();
+        _clearLogcatButton = new javax.swing.JButton();
+        _save = new javax.swing.JButton();
         _bottomPanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -164,16 +137,6 @@ public class ADBFrame extends javax.swing.JFrame {
 
         _packagesCombobox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        _clearLogcatButton.setText("Clear");
-        _clearLogcatButton.setMaximumSize(new java.awt.Dimension(30, 30));
-        _clearLogcatButton.setMinimumSize(new java.awt.Dimension(20, 20));
-        _clearLogcatButton.setPreferredSize(new java.awt.Dimension(30, 30));
-
-        _saveLogcatButton.setText("Start");
-        _saveLogcatButton.setMaximumSize(new java.awt.Dimension(30, 30));
-        _saveLogcatButton.setMinimumSize(new java.awt.Dimension(20, 20));
-        _saveLogcatButton.setPreferredSize(new java.awt.Dimension(30, 30));
-
         javax.swing.GroupLayout _topPanleLayout = new javax.swing.GroupLayout(_topPanle);
         _topPanle.setLayout(_topPanleLayout);
         _topPanleLayout.setHorizontalGroup(
@@ -182,27 +145,16 @@ public class ADBFrame extends javax.swing.JFrame {
                                 .addComponent(jLabel2)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(_packagesCombobox, javax.swing.GroupLayout.PREFERRED_SIZE, 273, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(465, 465, 465)
-                                .addComponent(_clearLogcatButton, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(_saveLogcatButton, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(32, Short.MAX_VALUE))
+                                .addContainerGap(400, Short.MAX_VALUE))
         );
         _topPanleLayout.setVerticalGroup(
                 _topPanleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(_topPanleLayout.createSequentialGroup()
                                 .addContainerGap(29, Short.MAX_VALUE)
-                                .addGroup(_topPanleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, _topPanleLayout.createSequentialGroup()
-                                                .addGroup(_topPanleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                                        .addComponent(jLabel2)
-                                                        .addComponent(_packagesCombobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                .addGap(28, 28, 28))
-                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, _topPanleLayout.createSequentialGroup()
-                                                .addGroup(_topPanleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                                        .addComponent(_clearLogcatButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(_saveLogcatButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                .addContainerGap())))
+                                .addGroup(_topPanleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jLabel2)
+                                        .addComponent(_packagesCombobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(28, 28, 28))
         );
 
         jLabel1.setText("Log level:");
@@ -218,6 +170,21 @@ public class ADBFrame extends javax.swing.JFrame {
         jLabel4.setText("Active Package:");
 
         _activePackageName.setText("{package name like: com.zemingo.ozvision}");
+
+        _startLogcat.setText("Start");
+        _startLogcat.setMaximumSize(new java.awt.Dimension(30, 30));
+        _startLogcat.setMinimumSize(new java.awt.Dimension(20, 20));
+        _startLogcat.setPreferredSize(new java.awt.Dimension(30, 30));
+
+        _clearLogcatButton.setText("Clear");
+        _clearLogcatButton.setMaximumSize(new java.awt.Dimension(30, 30));
+        _clearLogcatButton.setMinimumSize(new java.awt.Dimension(20, 20));
+        _clearLogcatButton.setPreferredSize(new java.awt.Dimension(30, 30));
+
+        _save.setText("Save");
+        _save.setMaximumSize(new java.awt.Dimension(30, 30));
+        _save.setMinimumSize(new java.awt.Dimension(20, 20));
+        _save.setPreferredSize(new java.awt.Dimension(30, 30));
 
         javax.swing.GroupLayout _centerPanelLayout = new javax.swing.GroupLayout(_centerPanel);
         _centerPanel.setLayout(_centerPanelLayout);
@@ -240,7 +207,13 @@ public class ADBFrame extends javax.swing.JFrame {
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(_activePackageName)))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(_topPanle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(_topPanle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(_startLogcat, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(_clearLogcatButton, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(_save, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         _centerPanelLayout.setVerticalGroup(
                 _centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -258,7 +231,11 @@ public class ADBFrame extends javax.swing.JFrame {
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                                         .addComponent(jLabel3)
-                                                        .addComponent(_filterTextBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                                        .addComponent(_filterTextBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                .addComponent(_clearLogcatButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(_startLogcat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(_save, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(scrollPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 517, Short.MAX_VALUE))
         );
@@ -297,6 +274,7 @@ public class ADBFrame extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>
+
     /**
      * @param args the command line arguments
      */
@@ -340,13 +318,14 @@ public class ADBFrame extends javax.swing.JFrame {
     private javax.swing.JButton _clearLogcatButton;
     private javax.swing.JTextField _filterTextBox;
     private javax.swing.JButton _installAPKButoon;
-    private javax.swing.JComboBox _logcatLevelComboBox;
+    private javax.swing.JComboBox<LogcatLevel> _logcatLevelComboBox;
     private javax.swing.JTable _logcatTable;
     private javax.swing.JComboBox _packagesCombobox;
     private javax.swing.JButton _restatADBServer;
     private javax.swing.JPanel _rigthPanel;
-    private javax.swing.JButton _saveLogcatButton;
+    private javax.swing.JButton _save;
     private javax.swing.JButton _sendTextButton;
+    private javax.swing.JButton _startLogcat;
     private javax.swing.JPanel _topPanle;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
