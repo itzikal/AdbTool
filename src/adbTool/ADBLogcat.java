@@ -32,7 +32,7 @@ public class ADBLogcat
 
     public void startLogcat(LogcatLevel level)
     {
-        Close();
+        close();
         _process = executeLogcatCommand("*:" + level.getLetter() + " |grep " + ADBWrapper.getInstance().mPid);
         _logcatThread = new Thread(() -> {
             while (true)
@@ -84,7 +84,7 @@ public class ADBLogcat
         return null;
     }
 
-    public void Close()
+    public void close()
     {
         _listChangeListener.listCleared();
         if (_logcatThread != null)

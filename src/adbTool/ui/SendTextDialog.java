@@ -1,12 +1,15 @@
 package adbTool.ui;
 
 import java.awt.Frame;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import adbTool.ADBWrapper;
 
 public class SendTextDialog extends JDialog
 {
@@ -21,6 +24,40 @@ public class SendTextDialog extends JDialog
     {
         super(parent, modal);
         initComponents();
+        setActions();
+    }
+
+    private void setActions()
+    {
+        _cancel.addActionListener(arg0 -> SendTextDialog.this.setVisible(false));
+        _sendTextButton.addActionListener(arg0 -> new Thread(() -> sendText()).start());
+    }
+
+    private void sendText()
+    {
+        try
+        {
+            String text = _sendTextField.getText();
+            if (text == null || text.isEmpty()) return;
+            String[] split = text.split(" ");
+            ADBWrapper.getInstance().executeADBCommand("shell", "input", "text", split[0]).waitFor(3000, TimeUnit.MILLISECONDS);
+
+            int i = 1;
+            if (split.length > 1)
+            {
+                do
+                {
+                    ADBWrapper.getInstance().executeADBCommand("shell", "input", "keyevent", "62").waitFor(3000, TimeUnit.MILLISECONDS);
+                    ADBWrapper.getInstance().executeADBCommand("shell", "input", "text", split[i]).waitFor(3000, TimeUnit.MILLISECONDS);
+                    i++;
+                } while (i < split.length);
+            }
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+
     }
 
     public void run()
@@ -32,18 +69,18 @@ public class SendTextDialog extends JDialog
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents()
     {
-        initCancelButton();
         initTitle();
         initWindowParams();
         jPanel1 = new JPanel();
-        _title = new JLabel();
-        _sendTextField = new JTextField();
-        _sendTextButton = new JButton();
 
+        _sendTextField = new JTextField();
         _sendTextField.setToolTipText("");
 
+        _sendTextButton = new JButton();
         _sendTextButton.setText("Send Text");
 
+        _cancel = new JButton();
+        _cancel.setText("Cancel");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -66,13 +103,6 @@ public class SendTextDialog extends JDialog
         setMinimumSize(new java.awt.Dimension(600, 200));
         setPreferredSize(new java.awt.Dimension(600, 200));
         setResizable(false);
-    }
-
-    private void initCancelButton()
-    {
-        _cancel = new JButton();
-        _cancel.setText("Cancel");
-        _cancel.addActionListener(arg0 -> SendTextDialog.this.setVisible(false));
     }
 
     private void initTitle()

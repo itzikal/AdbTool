@@ -15,7 +15,7 @@ public class ADBWrapper
 
     protected ADBWrapper()
 	{
-        getActivePackageAndPid();
+        //getActivePackageAndPid();
 	}
 
 	public static ADBWrapper getInstance() 
