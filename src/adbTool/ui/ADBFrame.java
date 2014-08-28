@@ -68,7 +68,7 @@ public class ADBFrame extends javax.swing.JFrame {
         _sendTextButton = new javax.swing.JButton();
         _centerPanel = new javax.swing.JPanel();
         scrollPanel = new javax.swing.JScrollPane();
-        _logcatTable = new javax.swing.JTable();
+        _logcatTable = new LogcatTable();
         _topPanle = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         _packagesCombobox = new javax.swing.JComboBox();
@@ -320,7 +320,7 @@ public class ADBFrame extends javax.swing.JFrame {
     private javax.swing.JTextField _filterTextBox;
     private javax.swing.JButton _installAPKButoon;
     private javax.swing.JComboBox<LogcatLevel> _logcatLevelComboBox;
-    private javax.swing.JTable _logcatTable;
+    private LogcatTable _logcatTable;
     private javax.swing.JComboBox _packagesCombobox;
     private javax.swing.JButton _restatADBServer;
     private javax.swing.JPanel _rigthPanel;
