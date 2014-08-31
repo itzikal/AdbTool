@@ -4,11 +4,14 @@ import javax.swing.JComboBox;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import adbTool.ADBDevices;
 import adbTool.ADBLogcat;
+import adbTool.ADBWrapper;
+import adbTool.models.AndroidPackage;
 import adbTool.models.LogcatLevel;
 
 public class ADBFrame extends javax.swing.JFrame {
+
+    private AndroidPackage _activePackage;
 
     /**
      * Creates new form ADBFrame
@@ -17,7 +20,14 @@ public class ADBFrame extends javax.swing.JFrame {
         _logcatLevelComboBox = new JComboBox<LogcatLevel>(LogcatLevel.getValues());
         initComponents();
         setActions();
-        ADBDevices.getInstance().getDevices();
+        setActivePackage();
+
+    }
+
+    private void setActivePackage()
+    {
+        _activePackage = ADBWrapper.getInstance().getActivePackage();
+        _activePackageName.setText(_activePackage.getName());
     }
 
     private void setActions()

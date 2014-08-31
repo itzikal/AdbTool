@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
+
+import adbTool.models.*;
 
 public class ADBWrapper
 {
@@ -147,33 +148,34 @@ public class ADBWrapper
 
     private void getActivePackageAndPid()
     {
-
-        String s = null;
-        Process p = executeADBCommand("shell", "dumpsys activity | grep top-activity");
-        InputStream is = p.getInputStream();
-        InputStreamReader isr = new InputStreamReader(is);
-        BufferedReader bufferdreader = new BufferedReader(isr);
-        try
-
-        {
-            s = bufferdreader.readLine();
-        }
-        catch (Exception e)
-        {
-
-        }
-
-        try
-        {
-            p.waitFor(1000, TimeUnit.MILLISECONDS);
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
-
-        mPagkage = s.substring(s.lastIndexOf(":") + 1, s.lastIndexOf("/"));
-        mPid = s.substring(s.indexOf("trm:") + "trm: 0 ".length(), s.lastIndexOf(":"));
+        ArrayList<String> shell = getProcessResult(executeADBCommand("shell", "dumpsys activity | grep top-activity"));
+        int x = 0;
+        //
+        //        String s = null;
+        //        Process p = executeADBCommand("shell", "dumpsys activity | grep top-activity");
+        //        InputStream is = p.getInputStream();
+        //        InputStreamReader isr = new InputStreamReader(is);
+        //        BufferedReader bufferdreader = new BufferedReader(isr);
+        //        try
+        //
+        //        {
+        //            s = bufferdreader.readLine();
+        //        }
+        //        catch (Exception e)
+        //        {
+        //
+        //        }
+        //
+        //        try
+        //        {
+        //            p.waitFor(1000, TimeUnit.MILLISECONDS);
+        //        }
+        //        catch (InterruptedException e)
+        //        {
+        //            e.printStackTrace();
+        //        }
+        //
+        //
     }
 
     public void installApk(String filename)
@@ -181,15 +183,15 @@ public class ADBWrapper
         executeADBCommand(filename);
     }
 
-    public String getActivePackage()
+    public AndroidPackage getActivePackage()
     {
-        Process p = executeADBCommand("shell", "dumpsys", "activity");//, "|", "find", "\"top-activity\"");
-
-
-
-        return "";
+        ArrayList<String> processResult = searchProcessResult(executeADBCommand("shell", "dumpsys", "activity"), "top-activity");
+        String s = processResult.get(0);
+        AndroidPackage p = new AndroidPackage();
+        p.setName(s.substring(s.lastIndexOf(":") + 1, s.lastIndexOf("/")));
+        p.setPid(s.substring(s.indexOf("trm:") + "trm: 0 ".length(), s.lastIndexOf(":")));
+        return p;
     }
-
 
 
     public ArrayList<String> getProcessResult(Process process)
@@ -202,7 +204,7 @@ public class ADBWrapper
         try
 
         {
-            process.waitFor();
+            //  process.waitFor();
             String line;
             while ((line = bufferdreader.readLine()) != null)
             {
@@ -213,11 +215,41 @@ public class ADBWrapper
         {
             e.printStackTrace();
         }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
+        //        catch (InterruptedException e)
+        //        {
+        //            e.printStackTrace();
+        //        }
 
         return list;
     }
+
+    public ArrayList<String> searchProcessResult(Process process, String search)
+    {
+        InputStream is = process.getInputStream();
+        InputStreamReader isr = new InputStreamReader(is);
+        BufferedReader bufferdreader = new BufferedReader(isr);
+        ArrayList<String> list = new ArrayList<String>();
+
+        try
+
+        {
+            //  process.waitFor();
+            String line;
+            while ((line = bufferdreader.readLine()) != null)
+            {
+                if (line.contains(search)) list.add(line);
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        //        catch (InterruptedException e)
+        //        {
+        //            e.printStackTrace();
+        //        }
+
+        return list;
+    }
+
 }
