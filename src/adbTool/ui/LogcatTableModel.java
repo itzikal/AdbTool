@@ -1,15 +1,10 @@
 package adbTool.ui;
 
-import java.sql.Date;
-import java.util.ArrayList;
-
 import javax.swing.DefaultListModel;
-import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 
 import adbTool.ADBLogcat;
-import adbTool.ADBWrapper;
-import adbTool.UnreachableCodeException;
+import adbTool.exceptions.UnreachableCodeException;
 import adbTool.interfaces.OnListChangeListener;
 import adbTool.models.ILogcatItem;
 import adbTool.models.LogcatItem;

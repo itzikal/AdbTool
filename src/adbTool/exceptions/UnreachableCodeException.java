@@ -1,4 +1,4 @@
-package adbTool;
+package adbTool.exceptions;
 
 public class UnreachableCodeException extends RuntimeException
 {
