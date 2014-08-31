@@ -4,6 +4,7 @@ import javax.swing.JComboBox;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import adbTool.ADBDevices;
 import adbTool.ADBLogcat;
 import adbTool.models.LogcatLevel;
 
@@ -16,6 +17,7 @@ public class ADBFrame extends javax.swing.JFrame {
         _logcatLevelComboBox = new JComboBox<LogcatLevel>(LogcatLevel.getValues());
         initComponents();
         setActions();
+        ADBDevices.getInstance().getDevices();
     }
 
     private void setActions()
