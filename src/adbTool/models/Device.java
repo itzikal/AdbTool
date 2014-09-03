@@ -60,4 +60,10 @@ public class Device
     {
         return _sdk;
     }
+
+    @Override
+    public String toString()
+    {
+        return String.format("%s %s %s (API %s)", _manufacturer.toUpperCase(), _model, _release, _sdk);
+    }
 }

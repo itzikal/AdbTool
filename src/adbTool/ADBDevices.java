@@ -24,7 +24,7 @@ public class ADBDevices
         return _instance;
     }
 
-    public ArrayList<String> getDevices()
+    public ArrayList<Device> getDevices()
     {
         ArrayList<String> devices = executeADBCommand("devices");
         ArrayList<String> devicesId = new ArrayList<String>();
@@ -46,12 +46,10 @@ public class ADBDevices
 
         }
 
-        getDeviceInformation(devicesId);
-
-        return devicesId;
+        return getDeviceInformation(devicesId);
     }
 
-    private void getDeviceInformation(ArrayList<String> devicesId)
+    private ArrayList<Device> getDeviceInformation(ArrayList<String> devicesId)
     {
 
         ArrayList<Device> devices = new ArrayList<>();
@@ -75,6 +73,7 @@ public class ADBDevices
 
             devices.add(device);
         }
+        return devices;
     }
 
     private ArrayList<String> executeADBCommand(String... strings)

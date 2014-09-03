@@ -11,12 +11,10 @@ import adbTool.models.*;
 public class ADBWrapper
 {
     private static ADBWrapper _instance;
-    public String mPagkage;
-    public String mPid;
 
     protected ADBWrapper()
     {
-        //getActivePackageAndPid();
+
     }
 
     public static ADBWrapper getInstance()
@@ -32,7 +30,7 @@ public class ADBWrapper
     {
         try
         {
-            executeADBCommand("kill-server").wait();
+            executeADBCommand("kill-server").waitFor();
             executeADBCommand("start-server");
         }
         catch (InterruptedException e)
@@ -71,127 +69,88 @@ public class ADBWrapper
     {
 
         ArrayList<String> l = new ArrayList<String>();
-        Process p = executeADBCommand("shell", "pm", "list", "packages", "-3");
-        InputStream is = p.getInputStream();
-        InputStreamReader isr = new InputStreamReader(is);
-        BufferedReader bufferdreader = new BufferedReader(isr);
-        while (true)
-        {
-            try
+        ArrayList<String> processResult = getProcessResult(executeADBCommand("shell", "pm", "list", "packages", "-3"));
 
-            {
-                String s = bufferdreader.readLine();
-                if (s == null) break;
-                if (!s.isEmpty())
-                {
-                    String x = s.replace("package:", "");
-                    l.add(x);
-                }
-            }
-            catch (Exception e)
-            {
-                break;
-            }
+        for (String s : processResult)
+        {
+            String x = s.replace("package:", "");
+            l.add(x);
         }
+
         return l;
     }
 
-    private ArrayList<String> getInstallAPKPackeages()
+    //    private ArrayList<String> getInstallAPKPackeages()
+    //    {
+    //
+    //        ArrayList<String> l = new ArrayList<String>();
+    //        Process p = executeADBCommand("shell", "pm", "list", "packages", "-f");
+    //        InputStream is = p.getInputStream();
+    //        InputStreamReader isr = new InputStreamReader(is);
+    //        BufferedReader bufferdreader = new BufferedReader(isr);
+    //        while (true)
+    //        {
+    //            try
+    //
+    //            {
+    //                String s = bufferdreader.readLine();
+    //                if (s == null) break;
+    //                if (!s.isEmpty())
+    //                {
+    //                    String x = s.substring(s.indexOf(":"), s.indexOf("="));
+    //                    l.add(x);
+    //                }
+    //            }
+    //            catch (Exception e)
+    //            {
+    //                break;
+    //            }
+    //        }
+    //        return l;
+    //    }
+    //
+    //    private String getPID(String packageName)
+    //    {
+    //
+    //        String s = null;
+    //        Process p = executeADBCommand("shell", "ps | grep " + packageName + " |gawk '{print $2}'");
+    //        InputStream is = p.getInputStream();
+    //        InputStreamReader isr = new InputStreamReader(is);
+    //        BufferedReader bufferdreader = new BufferedReader(isr);
+    //        try
+    //
+    //        {
+    //            s = bufferdreader.readLine();
+    //        }
+    //        catch (Exception e)
+    //        {
+    //
+    //        }
+    //
+    //        return s;
+    //    }
+
+
+    public Process installApk(String filename)
     {
-
-        ArrayList<String> l = new ArrayList<String>();
-        Process p = executeADBCommand("shell", "pm", "list", "packages", "-f");
-        InputStream is = p.getInputStream();
-        InputStreamReader isr = new InputStreamReader(is);
-        BufferedReader bufferdreader = new BufferedReader(isr);
-        while (true)
-        {
-            try
-
-            {
-                String s = bufferdreader.readLine();
-                if (s == null) break;
-                if (!s.isEmpty())
-                {
-                    String x = s.substring(s.indexOf(":"), s.indexOf("="));
-                    l.add(x);
-                }
-            }
-            catch (Exception e)
-            {
-                break;
-            }
-        }
-        return l;
-    }
-
-    private String getPID(String packageName)
-    {
-
-        String s = null;
-        Process p = executeADBCommand("shell", "ps | grep " + packageName + " |gawk '{print $2}'");
-        InputStream is = p.getInputStream();
-        InputStreamReader isr = new InputStreamReader(is);
-        BufferedReader bufferdreader = new BufferedReader(isr);
-        try
-
-        {
-            s = bufferdreader.readLine();
-        }
-        catch (Exception e)
-        {
-
-        }
-
-        return s;
-    }
-
-    private void getActivePackageAndPid()
-    {
-        ArrayList<String> shell = getProcessResult(executeADBCommand("shell", "dumpsys activity | grep top-activity"));
-        int x = 0;
-        //
-        //        String s = null;
-        //        Process p = executeADBCommand("shell", "dumpsys activity | grep top-activity");
-        //        InputStream is = p.getInputStream();
-        //        InputStreamReader isr = new InputStreamReader(is);
-        //        BufferedReader bufferdreader = new BufferedReader(isr);
-        //        try
-        //
-        //        {
-        //            s = bufferdreader.readLine();
-        //        }
-        //        catch (Exception e)
-        //        {
-        //
-        //        }
-        //
-        //        try
-        //        {
-        //            p.waitFor(1000, TimeUnit.MILLISECONDS);
-        //        }
-        //        catch (InterruptedException e)
-        //        {
-        //            e.printStackTrace();
-        //        }
-        //
-        //
-    }
-
-    public void installApk(String filename)
-    {
-        executeADBCommand(filename);
+        return executeADBCommand("install", filename);
     }
 
     public AndroidPackage getActivePackage()
     {
         ArrayList<String> processResult = searchProcessResult(executeADBCommand("shell", "dumpsys", "activity"), "top-activity");
+        if(processResult == null || processResult.isEmpty())
+        {
+            return new NullAndroidPackage();
+        }
         String s = processResult.get(0);
         AndroidPackage p = new AndroidPackage();
         p.setName(s.substring(s.lastIndexOf(":") + 1, s.lastIndexOf("/")));
         p.setPid(s.substring(s.indexOf("trm:") + "trm: 0 ".length(), s.lastIndexOf(":")));
         return p;
     }
+
+
 
 
     public ArrayList<String> getProcessResult(Process process)

@@ -33,7 +33,7 @@ public class ADBLogcat
     public void startLogcat(LogcatLevel level)
     {
         close();
-        _process = executeLogcatCommand("*:" + level.getLetter() + " |grep " + ADBWrapper.getInstance().mPid);
+        _process = executeLogcatCommand("*:" + level.getLetter());// + " |grep " + ADBWrapper.getInstance().mPid);
         _logcatThread = new Thread(() -> {
             while (true)
             {
