@@ -69,8 +69,6 @@ public class ADBDevices
             strings1 = executeADBCommand("-s", deviceId, "shell", "getprop", "ro.build.version.sdk");
             device.setSDK(strings1.get(0));
 
-
-
             devices.add(device);
         }
         return devices;

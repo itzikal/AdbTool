@@ -11,6 +11,7 @@ import adbTool.models.*;
 public class ADBWrapper
 {
     private static ADBWrapper _instance;
+    private Device _selectedDevice;
 
     protected ADBWrapper()
     {
@@ -41,9 +42,12 @@ public class ADBWrapper
 
     public Process executeADBCommand(String... args)
     {
-        String[] commands = new String[args.length + 1];
+        String[] commands = new String[args.length + 3];
         commands[0] = "adb";
-        int i = 1;
+        commands[1] = _selectedDevice == null? "": "-s";
+        commands[2] = _selectedDevice == null? "": _selectedDevice.getDeviceId();
+
+        int i = 3;
         for (String arg : args)
         {
             commands[i] = arg;
@@ -211,4 +215,8 @@ public class ADBWrapper
         return list;
     }
 
+    public void setDevice(Device device)
+    {
+        this._selectedDevice = device;
+    }
 }

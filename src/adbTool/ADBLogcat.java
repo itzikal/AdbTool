@@ -16,6 +16,7 @@ public class ADBLogcat
     private OnListChangeListener _listChangeListener;
 
     private static ADBLogcat _instance;
+    private LogcatLevel _logcatLevel = LogcatLevel.Debug;
 
     protected ADBLogcat()
     {
@@ -30,10 +31,10 @@ public class ADBLogcat
         return _instance;
     }
 
-    public void startLogcat(LogcatLevel level)
+    public void startLogcat()
     {
         close();
-        _process = executeLogcatCommand("*:" + level.getLetter());// + " |grep " + ADBWrapper.getInstance().mPid);
+        _process = executeLogcatCommand("*:" + _logcatLevel.getLetter());// + " |grep " + ADBWrapper.getInstance().mPid);
         _logcatThread = new Thread(() -> {
             while (true)
             {
@@ -125,4 +126,8 @@ public class ADBLogcat
 
     }
 
+    public void setLogcatLevel(LogcatLevel level)
+    {
+        _logcatLevel = level;
+    }
 }
