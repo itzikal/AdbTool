@@ -1,24 +1,31 @@
 package adbTool.models;
 
+import com.android.ddmlib.IDevice;
+
+import java.io.IOException;
+
+import adbTool.core.AdbWrapper;
+import adbTool.core.Util;
+
 /**
  * Created by Itzik on 31/08/2014.
  */
 public class Device
 {
-    private String _deviceId;
+    private IDevice _device;
     private String _manufacturer;
     private String _model;
     private String _release;
     private String _sdk;
 
-    public Device(String deviceId)
+    public Device(IDevice device)//String deviceId)
     {
-        _deviceId = deviceId;
+        _device = device;
     }
 
-    public String getDeviceId()
+    public String getIDeviceId()
     {
-        return _deviceId;
+        return _device.getSerialNumber();
     }
 
     public String getManufacturer()
@@ -64,6 +71,26 @@ public class Device
     @Override
     public String toString()
     {
-        return String.format("%s %s %s (API %s)", _manufacturer.toUpperCase(), _model, _release, _sdk);
+        return _device.getSerialNumber();
+                //String.format("%s %s %s (API %s)", _manufacturer.toUpperCase(), _model, _release, _sdk);
+    }
+
+    public String getSerialNumber()
+    {
+        return _device.getSerialNumber();
+    }
+
+    public boolean executeShellCommand(String shellCmd, AdbWrapper.ShellOutputReceiver receiver, int i)
+    {
+        try
+        {
+            _device.executeShellCommand(shellCmd, receiver, i);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 }

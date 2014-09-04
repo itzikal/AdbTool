@@ -42,12 +42,12 @@ public class ADBWrapper
 
     public Process executeADBCommand(String... args)
     {
-        String[] commands = new String[args.length + 3];
+        String[] commands = new String[args.length + 1];
         commands[0] = "adb";
-        commands[1] = _selectedDevice == null? "": "-s";
-        commands[2] = _selectedDevice == null? "": _selectedDevice.getDeviceId();
+//        commands[1] = _selectedDevice == null? "": "-s";
+//        commands[2] = _selectedDevice == null? "": _selectedDevice.getDeviceId();
 
-        int i = 3;
+        int i = 1;
         for (String arg : args)
         {
             commands[i] = arg;
@@ -223,7 +223,20 @@ public class ADBWrapper
     public ArrayList<String> getPackages()
     {
         ArrayList<String> results = new ArrayList<>();
-        ArrayList<String> processResult = getProcessResult(executeADBCommand("shell", "pm", "list", "packages"));
+       /*
+        pm list packages: prints all packages, optionally only
+        those whose package name contains the text in FILTER.  Options:
+
+        -f: see their associated file.
+        -d: filter to only show disbled packages.
+        -e: filter to only show enabled packages.
+        -s: filter to only show system packages.
+        -3: filter to only show third party packages.
+        -i: see the installer for the packages.
+        -u: also include uninstalled packages.
+
+        */
+        ArrayList<String> processResult = getProcessResult(executeADBCommand("shell", "pm", "list", "packages", "-3", "-e"));
         for (String s: processResult)
         {
             if(!s.contains(":"))
