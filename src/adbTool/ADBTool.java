@@ -9,7 +9,6 @@ public class ADBTool
 {
     public static void main(String[] args)
     {
-        ADBFrame frame = new ADBFrame();
-        frame.showAdbFrame();
+        ADBFrame.showAdbFrame();
     }
 }

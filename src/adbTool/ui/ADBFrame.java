@@ -1,7 +1,7 @@
 package adbTool.ui;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 
 import javax.swing.JComboBox;
 import javax.swing.SwingUtilities;
@@ -18,7 +18,7 @@ import adbTool.models.LogcatLevel;
 
 public class ADBFrame extends javax.swing.JFrame
 {
-
+    SortedListModel _sortedListModel = new SortedListModel();
     private AndroidPackage _activePackage;
 
     /**
@@ -31,56 +31,78 @@ public class ADBFrame extends javax.swing.JFrame
         initComponents();
         setActions();
         //refreshDeviceList();
-        refreshPackages();
-        setActivePackage();
-        DevicesComboboxModel devicesComboboxModel = new DevicesComboboxModel();
-        _devices.setModel(devicesComboboxModel);
 
+//        setActivePackage();
+
+        _packages.setModel(_sortedListModel);
         AdbWrapper.getInstance().connect(" ", new AdbWrapper.DeviceConnectionListener()
         {
             @Override
             public void deviceConnected(Device device)
             {
-                runInEventThread(() -> devicesComboboxModel.addElement(device), true);
+                runInEventThread(() -> _devices.addItem(device), true);
+
+//                SwingUtilities.invokeLater(new Runnable() {
+//                    @Override
+//                    public void run()
+//                    {
+//                        _devices.addItem(device);
+//                    }
+//                });
+
+//                runInEventThread(() -> {
+//                    _devices.addItem(device);
+//                    _devices.updateUI();
+//                }, true);
+//                _devices.updateUI();
             }
 
             @Override
             public void deviceDisconnected(Device device)
             {
                 Util.DbgLog("device removed " + device.getSerialNumber());
-                runInEventThread(() -> devicesComboboxModel.removeElement(device), true);
+                runInEventThread(() ->{ _devices.removeItem(device);_devices.updateUI();}, true);
             }
         });
+
     }
 
-    private void runInEventThread(Runnable r, boolean isSynchronous) {
-        if (isSynchronous) {
-            try {
+    private void runInEventThread(Runnable r, boolean isSynchronous)
+    {
+        if (isSynchronous)
+        {
+            try
+            {
                 SwingUtilities.invokeAndWait(r);
-            } catch (InterruptedException e) {
-            } catch (InvocationTargetException e) {
             }
-        } else {
+            catch (InterruptedException e)
+            {
+            }
+            catch (InvocationTargetException e)
+            {
+            }
+        }
+        else
+        {
             SwingUtilities.invokeLater(r);
         }
     }
+
     private void refreshPackages()
     {
-        ArrayList<String> packages = ADBWrapper.getInstance().getPackages();
-        SortedListModel sortedListModel = new SortedListModel();
-        sortedListModel.addAll(packages);
-        _packages.setModel(sortedListModel);
+        AdbWrapper.getInstance().getPackages(new PackageReceiver(), "pm", "list", "packages", "-3", "-e");
+
     }
 
-//    private void refreshDeviceList()
-//    {
-//        _devices.removeAllItems();
-//        ArrayList<Device> devices = ADBDevices.getInstance().getDevices();
-//        for (Device d : devices)
-//        {
-//            _devices.addItem(d);
-//        }
-//    }
+    //    private void refreshDeviceList()
+    //    {
+    //        _devices.removeAllItems();
+    //        ArrayList<Device> devices = ADBDevices.getInstance().getDevices();
+    //        for (Device d : devices)
+    //        {
+    //            _devices.addItem(d);
+    //        }
+    //    }
 
     private void setActivePackage()
     {
@@ -101,12 +123,13 @@ public class ADBFrame extends javax.swing.JFrame
 
         _devices.addActionListener(event -> {
             Device selectedItem = (Device) _devices.getSelectedItem();
-            Util.DbgLog("Selected device changed: "+ selectedItem.toString());
+            Util.DbgLog("Selected device changed: " + selectedItem.toString());
             if (selectedItem == null)
             {
                 return;
             }
             AdbWrapper.getInstance().setDevice(selectedItem);
+            refreshPackages();
         });
         _installAPKButoon.addActionListener(arg0 -> {
             ChooseAndInstallAPKDialog dialog = new ChooseAndInstallAPKDialog(ADBFrame.this, true);
@@ -252,20 +275,20 @@ public class ADBFrame extends javax.swing.JFrame
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Packages"));
 
-        _packages.setModel(new javax.swing.AbstractListModel()
-        {
-            String[] strings = {"Item 1", "Item 2", "Item 3", "Item 4", "Item 5"};
-
-            public int getSize()
-            {
-                return strings.length;
-            }
-
-            public Object getElementAt(int i)
-            {
-                return strings[i];
-            }
-        });
+//        _packages.setModel(new javax.swing.AbstractListModel()
+//        {
+//            String[] strings = {"Item 1", "Item 2", "Item 3", "Item 4", "Item 5"};
+//
+//            public int getSize()
+//            {
+//                return strings.length;
+//            }
+//
+//            public Object getElementAt(int i)
+//            {
+//                return strings[i];
+//            }
+//        });
         jScrollPane2.setViewportView(_packages);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -287,7 +310,7 @@ public class ADBFrame extends javax.swing.JFrame
     }// </editor-fold>
 
 
-    public void showAdbFrame()
+    public static void showAdbFrame()
     {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -339,7 +362,7 @@ public class ADBFrame extends javax.swing.JFrame
     private javax.swing.JPanel _centerPanel;
     private javax.swing.JButton _clearAppData;
     private javax.swing.JButton _clearLogcatButton;
-    private javax.swing.JComboBox<Device> _devices;
+    private javax.swing.JComboBox _devices;
     private javax.swing.JTextField _filterTextBox;
     private javax.swing.JButton _installAPKButoon;
     private javax.swing.JComboBox<LogcatLevel> _logcatLevelComboBox;
@@ -361,4 +384,41 @@ public class ADBFrame extends javax.swing.JFrame
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane scrollPanel;
     // End of variables declaration
+
+    private class PackageReceiver implements AdbWrapper.ShellOutputReceiver
+    {
+        @Override
+        public void addOutput(byte[] data, int offset, int length)
+        {
+            String s = null;
+            try
+            {
+                s = new String(data, offset, length, "ISO-8859-1"); //$NON-NLS-1$
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                // normal encoding didn't work, try the default one
+                s = new String(data, offset, length);
+            }
+
+            if(!s.contains(":"))
+                return;
+            String p = (s.split(":"))[1];
+            Util.DbgLog("added package: "+ p);
+            runInEventThread(()-> _sortedListModel.add(p), true);
+
+        }
+
+        @Override
+        public void flush()
+        {
+
+        }
+
+        @Override
+        public boolean isCancelled()
+        {
+            return false;
+        }
+    }
 }

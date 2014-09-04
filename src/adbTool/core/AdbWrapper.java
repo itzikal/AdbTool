@@ -39,6 +39,19 @@ public class AdbWrapper
 
     private Device mDevice;
 
+    public boolean getPackages(ShellOutputReceiver reciver, String... args)
+    {
+        StringBuilder sb = new StringBuilder();
+
+        for (String s : args)
+        {
+            sb.append(s);
+            sb.append(" ");
+
+        }
+        return executeShellCommand(sb.toString(), reciver);
+    }
+
     /**
      * Interface to listen device connection states.
      */
@@ -71,25 +84,25 @@ public class AdbWrapper
         return sSingletonInstance;
     }
 
-//    private static boolean checkPath(String filePath)
-//    {
-//        if (filePath != null)
-//        {
-//            if ((new File(filePath)).exists())
-//            {
-//                return true;
-//            }
-//            else
-//            {
-//                Util.DbgLog("File not found: " + filePath);
-//            }
-//        }
-//        else
-//        {
-//            Util.DbgLog("filePath is null");
-//        }
-//        return false;
-//    }
+    //    private static boolean checkPath(String filePath)
+    //    {
+    //        if (filePath != null)
+    //        {
+    //            if ((new File(filePath)).exists())
+    //            {
+    //                return true;
+    //            }
+    //            else
+    //            {
+    //                Util.DbgLog("File not found: " + filePath);
+    //            }
+    //        }
+    //        else
+    //        {
+    //            Util.DbgLog("filePath is null");
+    //        }
+    //        return false;
+    //    }
 
     public boolean connect(String adbFilePath, DeviceConnectionListener listener)
     {
@@ -139,7 +152,12 @@ public class AdbWrapper
 
     public boolean executeShellCommand(String shellCmd, ShellOutputReceiver receiver)
     {
-            return mDevice.executeShellCommand(shellCmd, receiver, 0 /*timeout*/);
+        if(mDevice == null)
+        {
+            return false;
+        }
+
+        return mDevice.executeShellCommand(shellCmd, receiver, 0 /*timeout*/);
     }
 
     public boolean executeShellCommand(Device device, String shellCmd, ShellOutputReceiver receiver)
