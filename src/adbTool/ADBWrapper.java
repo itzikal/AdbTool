@@ -219,4 +219,19 @@ public class ADBWrapper
     {
         this._selectedDevice = device;
     }
+
+    public ArrayList<String> getPackages()
+    {
+        ArrayList<String> results = new ArrayList<>();
+        ArrayList<String> processResult = getProcessResult(executeADBCommand("shell", "pm", "list", "packages"));
+        for (String s: processResult)
+        {
+            if(!s.contains(":"))
+            {
+                continue;
+            }
+            results.add((s.split(":"))[1]);
+        }
+        return results;
+    }
 }

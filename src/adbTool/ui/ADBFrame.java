@@ -27,7 +27,16 @@ public class ADBFrame extends javax.swing.JFrame
         initComponents();
         setActions();
         refreshDeviceList();
+        refreshPackages();
         setActivePackage();
+    }
+
+    private void refreshPackages()
+    {
+        ArrayList<String> packages = ADBWrapper.getInstance().getPackages();
+        SortedListModel sortedListModel = new SortedListModel();
+        sortedListModel.addAll(packages);
+        _packages.setModel(sortedListModel);
     }
 
     private void refreshDeviceList()
@@ -58,12 +67,12 @@ public class ADBFrame extends javax.swing.JFrame
 
         _devices.addActionListener(event -> {
             Device selectedItem = (Device) _devices.getSelectedItem();
-            if(selectedItem == null)
+            if (selectedItem == null)
             {
                 return;
             }
             ADBWrapper.getInstance().setDevice(selectedItem);
-         //   ADBLogcat.getInstance().startLogcat();
+            //   ADBLogcat.getInstance().startLogcat();
         });
         _installAPKButoon.addActionListener(arg0 -> {
             ChooseAndInstallAPKDialog dialog = new ChooseAndInstallAPKDialog(ADBFrame.this, true);
