@@ -3,7 +3,6 @@ package adbTool.ui;
 import java.util.ArrayList;
 
 import javax.swing.MutableComboBoxModel;
-import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
 import adbTool.models.Device;
