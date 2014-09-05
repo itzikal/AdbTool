@@ -95,7 +95,6 @@ public class Device
     {
         try
         {
-
             _device.executeShellCommand(shellCmd, receiver, i);
         }
         catch (IOException e)

@@ -1,10 +1,7 @@
 package adbTool;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
+import adbTool.core.AdbWrapper;
+import adbTool.core.ShellOutputReceiver;
 import adbTool.interfaces.OnListChangeListener;
 import adbTool.models.LogcatItem;
 import adbTool.models.LogcatLevel;
@@ -17,6 +14,21 @@ public class ADBLogcat
 
     private static ADBLogcat _instance;
     private LogcatLevel _logcatLevel = LogcatLevel.Debug;
+    ShellOutputReceiver mLogcatReceiver;
+
+    private void initReceiver()
+    {
+        mLogcatReceiver = new ShellOutputReceiver(null, results -> {
+            if (results != null && results.length != 0)
+            {
+                for (String s : results)
+                {
+                    LogcatItem item = new LogcatItem(s);
+                    _listChangeListener.itemAdded(item);
+                }
+            }
+        });
+    }
 
     protected ADBLogcat()
     {
@@ -34,34 +46,35 @@ public class ADBLogcat
     public void startLogcat()
     {
         close();
-        _process = executeLogcatCommand("*:" + _logcatLevel.getLetter());// + " |grep " + ADBWrapper.getInstance().mPid);
-        _logcatThread = new Thread(() -> {
-            while (true)
-            {
-                String s = getLine();
-                System.out.println(s);
-                if (s == null)
-                {
-                    try
-                    {
-                        Thread.sleep(200);
-                    }
-                    catch (InterruptedException e)
-                    {
-
-                    }
-                    continue;
-                }
-
-                if (s != null && !s.isEmpty())
-                {
-                    LogcatItem item = new LogcatItem(s);
-                    _listChangeListener.itemAdded(item);
-                }
-            }
-        });
-
-        _logcatThread.start();
+        startLogcat("logcat","*:" + _logcatLevel.getLetter());
+//        _process = executeLogcatCommand("*:" + _logcatLevel.getLetter());// + " |grep " + ADBWrapper.getInstance().mPid);
+//        _logcatThread = new Thread(() -> {
+//            while (true)
+//            {
+//                String s = getLine();
+//                System.out.println(s);
+//                if (s == null)
+//                {
+//                    try
+//                    {
+//                        Thread.sleep(200);
+//                    }
+//                    catch (InterruptedException e)
+//                    {
+//
+//                    }
+//                    continue;
+//                }
+//
+//                if (s != null && !s.isEmpty())
+//                {
+//                    LogcatItem item = new LogcatItem(s);
+//                    _listChangeListener.itemAdded(item);
+//                }
+//            }
+//        });
+//
+//        _logcatThread.start();
     }
 
     public void setOnListChangeListener(OnListChangeListener onListChangeListener)
@@ -69,65 +82,68 @@ public class ADBLogcat
         _listChangeListener = onListChangeListener;
     }
 
-    private String getLine()
-    {
-        InputStream is = _process.getInputStream();
-        InputStreamReader isr = new InputStreamReader(is);
-        BufferedReader bufferdreader = new BufferedReader(isr);
-        try
-        {
-            return bufferdreader.readLine();
-        }
-        catch (IOException e)
-        {
-        }
-
-        return null;
-    }
+//    private String getLine()
+//    {
+//        InputStream is = _process.getInputStream();
+//        InputStreamReader isr = new InputStreamReader(is);
+//        BufferedReader bufferdreader = new BufferedReader(isr);
+//        try
+//        {
+//            return bufferdreader.readLine();
+//        }
+//        catch (IOException e)
+//        {
+//        }
+//
+//        return null;
+//    }
 
     public void close()
     {
         _listChangeListener.listCleared();
-        if (_logcatThread != null)
-        {
-            _logcatThread.interrupt();
-        }
-
-        if (_process != null)
-        {
-            try
-            {
-                _process.destroy();
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
+//        if (_logcatThread != null)
+//        {
+//            _logcatThread.interrupt();
+//        }
+//
+//        if (_process != null)
+//        {
+//            try
+//            {
+//                _process.destroy();
+//            }
+//            catch (Exception e)
+//            {
+//                e.printStackTrace();
+//            }
+//        }
     }
 
     public void clearLogcat()
     {
-        executeLogcatCommand("-c");
+        AdbWrapper.getInstance().executeShellCommand(new ShellOutputReceiver(null, null), "logcat", "-c");
         _listChangeListener.listCleared();
     }
 
-    public Process executeLogcatCommand(String... args)
+    private void startLogcat(String... args)
     {
-        String[] commands = new String[args.length + 1];
-        commands[0] = "logcat";
-        int i = 1;
-        for (String arg : args)
-        {
-            commands[i] = arg;
-            i++;
-        }
-        return ADBWrapper.getInstance().executeADBCommand(commands);
+        initReceiver();
+        AdbWrapper.getInstance().executeShellCommand(mLogcatReceiver, args);
+//        String[] commands = new String[args.length + 1];
+//        commands[0] = "logcat";
+//        int i = 1;
+//        for (String arg : args)
+//        {
+//            commands[i] = arg;
+//            i++;
+//        }
+//        return ADBWrapper.getInstance().executeADBCommand(commands);
 
     }
 
     public void setLogcatLevel(LogcatLevel level)
     {
         _logcatLevel = level;
+        startLogcat();
     }
 }
