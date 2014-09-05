@@ -81,6 +81,7 @@ public class ADBFrame extends javax.swing.JFrame
 
     private void addPackagesFromShellResult(String[] results)
     {
+        runInEventThread(()->{
         for (String s :results)
         {
             if(s.contains(":"))
@@ -88,7 +89,7 @@ public class ADBFrame extends javax.swing.JFrame
                 s = s.split(":")[1];
             }
             _sortedPackageListModel.add(s);
-        }
+        }}, false);
     }
 
     private void setActivePackage()
@@ -101,8 +102,6 @@ public class ADBFrame extends javax.swing.JFrame
                 runInEventThread(()->  _activePackageName.setText(_activePackage.getName()), false);
             }
         });
-
-
     }
 
     private void setActions()

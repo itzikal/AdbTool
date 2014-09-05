@@ -41,12 +41,12 @@ public class AdbWrapper
 
     private Device mDevice;
 
-    public boolean getPackages(ShellOutputReceiver reciver, String... args)
+    public void getPackages(ShellOutputReceiver reciver, String... args)
     {
-        return executeShellCommand(reciver, "pm", "list", "packages", "-3", "-e");
+        executeShellCommand(reciver, "pm", "list", "packages", "-3", "-e");
     }
 
-    public boolean executeShellCommand(ShellOutputReceiver reciver, String... args)
+    public void executeShellCommand(ShellOutputReceiver reciver, String... args)
     {
         StringBuilder sb = new StringBuilder();
 
@@ -55,10 +55,11 @@ public class AdbWrapper
             sb.append(s);
             sb.append(" ");
         }
-        return executeShellCommand(sb.toString(), reciver);
+
+        executeShellCommand(sb.toString(), reciver);
     }
 
-    public boolean getActivePackage(ShellCommandResult<AndroidPackage> result)
+    public void getActivePackage(ShellCommandResult<AndroidPackage> result)
     {
         adbTool.core.ShellOutputReceiver reciver = new adbTool.core.ShellOutputReceiver("top-activity", new adbTool.core.ShellOutputReceiver.ShellOutputReceiverResults() {
             @Override
@@ -72,6 +73,11 @@ public class AdbWrapper
                 else
                 {
                     String s = results[0];
+                    if(!s.contains("trm"))
+                    {
+                        return;
+                    }
+                    Util.DbgLog("On active package received: "+s);
                     p = new AndroidPackage();
                     p.setName(s.substring(s.lastIndexOf(":") + 1, s.lastIndexOf("/")));
                     p.setPid(s.substring(s.indexOf("trm:") + "trm: 0 ".length(), s.lastIndexOf(":")));
@@ -79,7 +85,7 @@ public class AdbWrapper
                 result.onCommandResult(p);
             }
         });
-        return executeShellCommand(reciver, "dumpsys", "activity");
+        executeShellCommand(reciver, "dumpsys", "activity");
     }
 
     /**
@@ -92,12 +98,6 @@ public class AdbWrapper
         void deviceDisconnected(Device devSerialNumber);
     }
 
-    /**
-     * Interface to receive shell-command output.
-     * This wrapper is to hide any interfaces from ddmlib.
-     *
-     * @see {@link #executeShellCommand(String, String, ShellOutputReceiver)}.
-     */
     public static interface ShellOutputReceiver extends IShellOutputReceiver
     {}
 
@@ -185,14 +185,13 @@ public class AdbWrapper
         mDevice = device;
     }
 
-    public boolean executeShellCommand(String shellCmd, ShellOutputReceiver receiver)
+    public void executeShellCommand(String shellCmd, ShellOutputReceiver receiver)
     {
         if (mDevice == null)
         {
-            return false;
+            return;
         }
-
-        return mDevice.executeShellCommand(shellCmd, receiver, 0 /*timeout*/);
+        new Thread(()->mDevice.executeShellCommand(shellCmd, receiver, 0 /*timeout*/)).start();
     }
 
     public boolean executeShellCommand(Device device, String shellCmd, ShellOutputReceiver receiver)
