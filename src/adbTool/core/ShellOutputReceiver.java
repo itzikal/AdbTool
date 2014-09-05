@@ -149,7 +149,10 @@ public class ShellOutputReceiver implements AdbWrapper.ShellOutputReceiver
      */
     public void processNewLines(String[] lines)
     {
-        _shellOutputReceiverResults.onResultReceived(lines);
+        if( _shellOutputReceiverResults != null)
+        {
+            _shellOutputReceiverResults.onResultReceived(lines);
+        }
     }
 
     @Override

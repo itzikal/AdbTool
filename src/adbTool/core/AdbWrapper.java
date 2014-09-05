@@ -77,7 +77,7 @@ public class AdbWrapper
                     {
                         return;
                     }
-                    Util.DbgLog("On active package received: "+s);
+                    Util.DbgLog("On active package received: " + s);
                     p = new AndroidPackage();
                     p.setName(s.substring(s.lastIndexOf(":") + 1, s.lastIndexOf("/")));
                     p.setPid(s.substring(s.indexOf("trm:") + "trm: 0 ".length(), s.lastIndexOf(":")));
@@ -86,6 +86,15 @@ public class AdbWrapper
             }
         });
         executeShellCommand(reciver, "dumpsys", "activity");
+    }
+
+    public void sendText(String text)
+    {
+        String replaceSpaces = text.replace(" ", " && input keyevent 62 && input text ");
+        String replacePriod = replaceSpaces.replace(".", " && input keyevent 56 && input text ");
+        String replaceComma = replacePriod.replace(",", " && input keyevent 55 && input text ");
+        String concat = "input text ".concat(replaceComma);
+        executeShellCommand(concat, new adbTool.core.ShellOutputReceiver(null, null));
     }
 
     /**
