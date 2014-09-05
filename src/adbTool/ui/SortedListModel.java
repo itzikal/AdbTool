@@ -10,27 +10,27 @@ import java.util.TreeSet;
 import javax.swing.AbstractListModel;
 
 public class SortedListModel<T> extends AbstractListModel {
-    SortedSet<Object> model;
+    SortedSet<T> model;
 
     public SortedListModel() {
-        model = new TreeSet<Object>();
+        model = new TreeSet<T>();
     }
 
     public int getSize() {
         return model.size();
     }
 
-    public Object getElementAt(int index) {
-        return model.toArray()[index];
+    public T getElementAt(int index) {
+        return (T)model.toArray()[index];
     }
 
-    public void add(Object element) {
+    public void add(T element) {
         if (model.add(element)) {
             fireContentsChanged(this, 0, getSize());
         }
     }
-    public void addAll(Object elements[]) {
-        Collection<Object> c = Arrays.asList(elements);
+    public void addAll(T elements[]) {
+        Collection<T> c = Arrays.asList(elements);
         model.addAll(c);
         fireContentsChanged(this, 0, getSize());
     }
@@ -46,11 +46,11 @@ public class SortedListModel<T> extends AbstractListModel {
         fireContentsChanged(this, 0, getSize());
     }
 
-    public boolean contains(Object element) {
+    public boolean contains(T element) {
         return model.contains(element);
     }
 
-    public Object firstElement() {
+    public T firstElement() {
         return model.first();
     }
 
@@ -58,11 +58,11 @@ public class SortedListModel<T> extends AbstractListModel {
         return model.iterator();
     }
 
-    public Object lastElement() {
+    public T lastElement() {
         return model.last();
     }
 
-    public boolean removeElement(Object element) {
+    public boolean removeElement(T element) {
         boolean removed = model.remove(element);
         if (removed) {
             fireContentsChanged(this, 0, getSize());

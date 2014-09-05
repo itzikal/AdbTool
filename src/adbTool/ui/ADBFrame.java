@@ -1,6 +1,5 @@
 package adbTool.ui;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.JComboBox;
@@ -9,8 +8,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import adbTool.ADBLogcat;
-import adbTool.ADBWrapper;
 import adbTool.core.AdbWrapper;
+import adbTool.core.ShellOutputReceiver;
 import adbTool.core.Util;
 import adbTool.models.AndroidPackage;
 import adbTool.models.Device;
@@ -18,7 +17,7 @@ import adbTool.models.LogcatLevel;
 
 public class ADBFrame extends javax.swing.JFrame
 {
-    SortedListModel _sortedListModel = new SortedListModel();
+    SortedListModel<String> _sortedPackageListModel = new SortedListModel<String>();
     private AndroidPackage _activePackage;
 
     /**
@@ -33,30 +32,15 @@ public class ADBFrame extends javax.swing.JFrame
         //refreshDeviceList();
 
 //        setActivePackage();
+        _packages.setModel(_sortedPackageListModel);
 
-        _packages.setModel(_sortedListModel);
         AdbWrapper.getInstance().connect(" ", new AdbWrapper.DeviceConnectionListener()
         {
             @Override
             public void deviceConnected(Device device)
             {
                 runInEventThread(() -> _devices.addItem(device), true);
-
-//                SwingUtilities.invokeLater(new Runnable() {
-//                    @Override
-//                    public void run()
-//                    {
-//                        _devices.addItem(device);
-//                    }
-//                });
-
-//                runInEventThread(() -> {
-//                    _devices.addItem(device);
-//                    _devices.updateUI();
-//                }, true);
-//                _devices.updateUI();
             }
-
             @Override
             public void deviceDisconnected(Device device)
             {
@@ -90,24 +74,35 @@ public class ADBFrame extends javax.swing.JFrame
 
     private void refreshPackages()
     {
-        AdbWrapper.getInstance().getPackages(new PackageReceiver(), "pm", "list", "packages", "-3", "-e");
-
+        _sortedPackageListModel.clear();
+        AdbWrapper.getInstance()
+                .getPackages(new ShellOutputReceiver(null, results -> addPackagesFromShellResult(results)));
     }
 
-    //    private void refreshDeviceList()
-    //    {
-    //        _devices.removeAllItems();
-    //        ArrayList<Device> devices = ADBDevices.getInstance().getDevices();
-    //        for (Device d : devices)
-    //        {
-    //            _devices.addItem(d);
-    //        }
-    //    }
+    private void addPackagesFromShellResult(String[] results)
+    {
+        for (String s :results)
+        {
+            if(s.contains(":"))
+            {
+                s = s.split(":")[1];
+            }
+            _sortedPackageListModel.add(s);
+        }
+    }
 
     private void setActivePackage()
     {
-        _activePackage = ADBWrapper.getInstance().getActivePackage();
-        _activePackageName.setText(_activePackage.getName());
+        AdbWrapper.getInstance().getActivePackage(new AdbWrapper.ShellCommandResult<AndroidPackage>() {
+            @Override
+            public <T> void onCommandResult(T result)
+            {
+                _activePackage =(AndroidPackage)result;
+                runInEventThread(()->  _activePackageName.setText(_activePackage.getName()), false);
+            }
+        });
+
+
     }
 
     private void setActions()
@@ -130,6 +125,7 @@ public class ADBFrame extends javax.swing.JFrame
             }
             AdbWrapper.getInstance().setDevice(selectedItem);
             refreshPackages();
+            setActivePackage();
         });
         _installAPKButoon.addActionListener(arg0 -> {
             ChooseAndInstallAPKDialog dialog = new ChooseAndInstallAPKDialog(ADBFrame.this, true);
@@ -385,40 +381,5 @@ public class ADBFrame extends javax.swing.JFrame
     private javax.swing.JScrollPane scrollPanel;
     // End of variables declaration
 
-    private class PackageReceiver implements AdbWrapper.ShellOutputReceiver
-    {
-        @Override
-        public void addOutput(byte[] data, int offset, int length)
-        {
-            String s = null;
-            try
-            {
-                s = new String(data, offset, length, "ISO-8859-1"); //$NON-NLS-1$
-            }
-            catch (UnsupportedEncodingException e)
-            {
-                // normal encoding didn't work, try the default one
-                s = new String(data, offset, length);
-            }
 
-            if(!s.contains(":"))
-                return;
-            String p = (s.split(":"))[1];
-            Util.DbgLog("added package: "+ p);
-            runInEventThread(()-> _sortedListModel.add(p), true);
-
-        }
-
-        @Override
-        public void flush()
-        {
-
-        }
-
-        @Override
-        public boolean isCancelled()
-        {
-            return false;
-        }
-    }
 }

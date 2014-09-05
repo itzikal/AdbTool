@@ -26,7 +26,9 @@ import com.android.ddmlib.IShellOutputReceiver;
 import java.util.ArrayList;
 import java.util.List;
 
+import adbTool.models.AndroidPackage;
 import adbTool.models.Device;
+import adbTool.models.NullAndroidPackage;
 
 public class AdbWrapper
 {
@@ -41,15 +43,43 @@ public class AdbWrapper
 
     public boolean getPackages(ShellOutputReceiver reciver, String... args)
     {
+        return executeShellCommand(reciver, "pm", "list", "packages", "-3", "-e");
+    }
+
+    public boolean executeShellCommand(ShellOutputReceiver reciver, String... args)
+    {
         StringBuilder sb = new StringBuilder();
 
         for (String s : args)
         {
             sb.append(s);
             sb.append(" ");
-
         }
         return executeShellCommand(sb.toString(), reciver);
+    }
+
+    public boolean getActivePackage(ShellCommandResult<AndroidPackage> result)
+    {
+        adbTool.core.ShellOutputReceiver reciver = new adbTool.core.ShellOutputReceiver("top-activity", new adbTool.core.ShellOutputReceiver.ShellOutputReceiverResults() {
+            @Override
+            public void onResultReceived(String[] results)
+            {
+                AndroidPackage p;
+                if(results == null || results.length == 0)
+                {
+                    p = new NullAndroidPackage();
+                }
+                else
+                {
+                    String s = results[0];
+                    p = new AndroidPackage();
+                    p.setName(s.substring(s.lastIndexOf(":") + 1, s.lastIndexOf("/")));
+                    p.setPid(s.substring(s.indexOf("trm:") + "trm: 0 ".length(), s.lastIndexOf(":")));
+                }
+                result.onCommandResult(p);
+            }
+        });
+        return executeShellCommand(reciver, "dumpsys", "activity");
     }
 
     /**
@@ -70,6 +100,11 @@ public class AdbWrapper
      */
     public static interface ShellOutputReceiver extends IShellOutputReceiver
     {}
+
+    public interface ShellCommandResult<T>
+    {
+        <T> void onCommandResult(T result);
+    }
 
     private AdbWrapper()
     {
@@ -152,7 +187,7 @@ public class AdbWrapper
 
     public boolean executeShellCommand(String shellCmd, ShellOutputReceiver receiver)
     {
-        if(mDevice == null)
+        if (mDevice == null)
         {
             return false;
         }

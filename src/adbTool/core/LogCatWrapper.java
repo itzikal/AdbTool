@@ -16,20 +16,18 @@
 
 package adbTool.core;
 
-import com.android.ddmlib.IShellOutputReceiver;
 import com.android.ddmlib.Log.LogLevel;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public class LogCatWrapper {
+public class LogCatWrapper
+{
     private final int STRING_BUFFER_LENGTH;
-    private static final Pattern sHeaderPattern = Pattern.compile(
-            "^\\[\\s(\\d\\d-\\d\\d\\s\\d\\d:\\d\\d:\\d\\d\\.\\d+)" + //$NON-NLS-1$
-            "\\s+(\\d*):(0x[0-9a-fA-F]+)\\s([VDIWE])/(.*)\\]$"); //$NON-NLS-1$
+    private static final Pattern sHeaderPattern = Pattern.compile("^\\[\\s(\\d\\d-\\d\\d\\s\\d\\d:\\d\\d:\\d\\d\\.\\d+)" + //$NON-NLS-1$
+                    "\\s+(\\d*):(0x[0-9a-fA-F]+)\\s([VDIWE])/(.*)\\]$"); //$NON-NLS-1$
     private LogMessage[] mBuffer;
     private int mBufferEnd;
     private int mBufferStart;
@@ -38,13 +36,14 @@ public class LogCatWrapper {
     private LogColors mDefaultFilterColor = null;
     private LogMessageInfo mLastMessageInfo = null;
     private String mDevSerialNumber = null;
-    private LogCatOutputReceiver mReceiver = null;
+    private ShellOutputReceiver mReceiver = null;
 
     /**
      * @param devSerialNumber
      * @param maxLogsToManage
      */
-    public LogCatWrapper(String devSerialNumber, int maxLogsToManage) {
+    public LogCatWrapper(String devSerialNumber, int maxLogsToManage)
+    {
         STRING_BUFFER_LENGTH = maxLogsToManage;
         mBuffer = new LogMessage[STRING_BUFFER_LENGTH];
         mBufferStart = -1;
@@ -60,20 +59,22 @@ public class LogCatWrapper {
         mDefaultFilter = new LogFilter("Log");
         mDefaultFilter.setColors(mDefaultFilterColor);
         mDevSerialNumber = new String(devSerialNumber);
-        mReceiver = new LogCatOutputReceiver();
+        mReceiver = new ShellOutputReceiver(null, results -> addLog(results));
     }
 
     /**
      * @param outputInterface
      */
-    public void setDefaultFilterOutput(FilterOutput outputInterface) {
+    public void setDefaultFilterOutput(FilterOutput outputInterface)
+    {
         mDefaultFilter.setOutput(outputInterface);
     }
 
     /**
      * @return
      */
-    public AdbWrapper.ShellOutputReceiver getShellOutputReceiver() {
+    public AdbWrapper.ShellOutputReceiver getShellOutputReceiver()
+    {
         return mReceiver;
     }
 
@@ -85,18 +86,23 @@ public class LogCatWrapper {
      * @param colors
      * @param outInterface
      */
-    public void addFilter(String filterName, String tag, String pid, String logLevel,
-            LogColors colors, FilterOutput outInterface) {
+    public void addFilter(String filterName, String tag, String pid, String logLevel, LogColors colors, FilterOutput outInterface)
+    {
         LogFilter newFilter = new LogFilter(filterName);
         newFilter.setTagMode(tag);
-        if (pid != null && pid.length() > 0) {
+        if (pid != null && pid.length() > 0)
+        {
             newFilter.setPidMode(Integer.parseInt(pid));
-        } else {
+        }
+        else
+        {
             newFilter.setPidMode(-1);
         }
-        if (logLevel != null && logLevel.length() > 0) {
+        if (logLevel != null && logLevel.length() > 0)
+        {
             int level = -1;
-            switch (logLevel.charAt(0)) {
+            switch (logLevel.charAt(0))
+            {
                 case 'E':
                     level = 6;
                     break;
@@ -114,43 +120,53 @@ public class LogCatWrapper {
                     break;
             }
             newFilter.setLogLevel(level);
-        } else {
+        }
+        else
+        {
             newFilter.setLogLevel(-1);
         }
 
-        if (colors != null) {
+        if (colors != null)
+        {
             newFilter.setColors(colors);
-        } else {
+        }
+        else
+        {
             newFilter.setColors(mDefaultFilterColor);
         }
 
         // add it to the array.
-        if (mFilters != null && mFilters.length > 0) {
-            LogFilter[] newFilters = new LogFilter[mFilters.length+1];
+        if (mFilters != null && mFilters.length > 0)
+        {
+            LogFilter[] newFilters = new LogFilter[mFilters.length + 1];
             System.arraycopy(mFilters, 0, newFilters, 0, mFilters.length);
             newFilters[mFilters.length] = newFilter;
             mFilters = newFilters;
-        } else {
+        }
+        else
+        {
             mFilters = new LogFilter[1];
             mFilters[0] = newFilter;
         }
 
-        if (outInterface != null)
-            newFilter.setOutput(outInterface);
+        if (outInterface != null) newFilter.setOutput(outInterface);
     }
 
-    protected void addLog(String []lines) {
-        if (lines.length > STRING_BUFFER_LENGTH) {
+    protected void addLog(String[] lines)
+    {
+        if (lines.length > STRING_BUFFER_LENGTH)
+        {
             //Log.e("LogCat", "Receiving more lines than STRING_BUFFER_LENGTH");
         }
 
-        for (String line : lines) {
+        for (String line : lines)
+        {
             // ignore empty lines.
-            if (line.length() <= 0)
-                continue;
+            if (line.length() <= 0) continue;
             // check for header lines.
             Matcher matcher = sHeaderPattern.matcher(line);
-            if (matcher.matches()) {
+            if (matcher.matches())
+            {
                 // this is a header line, parse the header and keep it around.
                 mLastMessageInfo = new LogMessageInfo();
 
@@ -159,12 +175,15 @@ public class LogCatWrapper {
                 mLastMessageInfo.pid = Integer.valueOf(mLastMessageInfo.pidString);
                 mLastMessageInfo.logLevel = LogLevel.getByLetterString(matcher.group(4));
                 mLastMessageInfo.tag = matcher.group(5).trim();
-            } else {
+            }
+            else
+            {
                 // This is not a header line.
                 // Create a new LogMessage and process it.
                 LogMessage mc = new LogMessage();
 
-                if (mLastMessageInfo == null) {
+                if (mLastMessageInfo == null)
+                {
                     // The first line of output wasn't preceded
                     // by a header line; make something up so
                     // that users of mc.data don't NPE.
@@ -194,29 +213,37 @@ public class LogCatWrapper {
         // TODO:
         // the circular buffer has been updated, let have the filter flush their
         // display with the new messages.
-        if (mFilters != null) {
-            for (LogFilter f : mFilters) {
+        if (mFilters != null)
+        {
+            for (LogFilter f : mFilters)
+            {
                 f.flush();
             }
         }
 
-        if (mDefaultFilter != null) {
+        if (mDefaultFilter != null)
+        {
             mDefaultFilter.flush();
         }
     }
 
-    private void processNewMessage(LogMessage newMessage) {
+    private void processNewMessage(LogMessage newMessage)
+    {
         // compute the index where the message goes.
         // was the buffer empty?
         int messageIndex = -1;
-        if (mBufferStart == -1) {
+        if (mBufferStart == -1)
+        {
             messageIndex = mBufferStart = 0;
             mBufferEnd = 1;
-        } else {
+        }
+        else
+        {
             messageIndex = mBufferEnd;
 
             // check we aren't overwriting start
-            if (mBufferEnd == mBufferStart) {
+            if (mBufferEnd == mBufferStart)
+            {
                 mBufferStart = (mBufferStart + 1) % STRING_BUFFER_LENGTH;
             }
 
@@ -227,7 +254,8 @@ public class LogCatWrapper {
         LogMessage oldMessage = null;
 
         // record the message that was there before
-        if (mBuffer[messageIndex] != null) {
+        if (mBuffer[messageIndex] != null)
+        {
             oldMessage = mBuffer[messageIndex];
         }
 
@@ -236,34 +264,36 @@ public class LogCatWrapper {
 
         // give the new message to every filters.
         boolean filtered = false;
-        if (mFilters != null) {
-            for (LogFilter f : mFilters) {
+        if (mFilters != null)
+        {
+            for (LogFilter f : mFilters)
+            {
                 filtered |= f.addMessage(newMessage, oldMessage);
             }
         }
 
         // Unlike eclipse's implementation, all filtered messages will be seen in the default filter.
         //if (filtered == false && mDefaultFilter != null) {
-        if (mDefaultFilter != null) {
+        if (mDefaultFilter != null)
+        {
             mDefaultFilter.addMessage(newMessage, oldMessage);
         }
     }
 
-    public static class LogMessage {
+    public static class LogMessage
+    {
         public LogMessageInfo data;
         public String msg;
 
         @Override
-        public String toString() {
-            return data.time + ": "
-                + data.logLevel + "/"
-                + data.tag + "("
-                + data.pidString + "): "
-                + msg;
+        public String toString()
+        {
+            return data.time + ": " + data.logLevel + "/" + data.tag + "(" + data.pidString + "): " + msg;
         }
     }
 
-    public static class LogMessageInfo {
+    public static class LogMessageInfo
+    {
         public LogLevel logLevel;
         public int pid;
         public String pidString;
@@ -271,18 +301,22 @@ public class LogCatWrapper {
         public String time;
     }
 
-    public static class Color {
+    public static class Color
+    {
         int r;
         int g;
         int b;
-        public Color(int r, int g, int b) {
+
+        public Color(int r, int g, int b)
+        {
             this.r = r;
             this.g = g;
             this.b = b;
         }
     }
 
-    public static class LogColors {
+    public static class LogColors
+    {
         public Color infoColor;
         public Color debugColor;
         public Color errorColor;
@@ -290,7 +324,8 @@ public class LogCatWrapper {
         public Color verboseColor;
     }
 
-    public static class LogFilter {
+    public static class LogFilter
+    {
         public final static int MODE_PID = 0x01;
         public final static int MODE_TAG = 0x02;
         public final static int MODE_LEVEL = 0x04;
@@ -309,8 +344,10 @@ public class LogCatWrapper {
         private int mPid;
         private int mPids[] = null;
 
-        /** Single level log level as defined in Log.mLevelChar. Only valid
-         * if mMode is MODE_LEVEL */
+        /**
+         * Single level log level as defined in Log.mLevelChar. Only valid
+         * if mMode is MODE_LEVEL
+         */
         private int mLogLevel;
         private int mLogLevels[] = null;
 
@@ -320,16 +357,24 @@ public class LogCatWrapper {
         private String mTag;
         private String mTags[] = null;
 
-        /** Temp keyword filtering */
+        /**
+         * Temp keyword filtering
+         */
         private String[] mTempKeywordFilters;
 
-        /** temp pid filtering */
+        /**
+         * temp pid filtering
+         */
         private int mTempPid = -1;
 
-        /** temp tag filtering */
+        /**
+         * temp tag filtering
+         */
         private String mTempTag;
 
-        /** temp log level filtering */
+        /**
+         * temp log level filtering
+         */
         private int mTempLogLevel = -1;
 
         private LogColors mColors;
@@ -346,32 +391,39 @@ public class LogCatWrapper {
 
         /**
          * Creates a filter with a particular mode.
+         *
          * @param name The name to be displayed in the UI
          */
-        public LogFilter(String name) {
+        public LogFilter(String name)
+        {
             mName = name;
         }
 
-        public LogFilter() {
+        public LogFilter()
+        {
         }
 
         @Override
-        public String toString() {
+        public String toString()
+        {
             StringBuilder sb = new StringBuilder(mName);
 
             sb.append(':');
             sb.append(mMode);
-            if ((mMode & MODE_PID) == MODE_PID) {
+            if ((mMode & MODE_PID) == MODE_PID)
+            {
                 sb.append(':');
                 sb.append(mPid);
             }
 
-            if ((mMode & MODE_LEVEL) == MODE_LEVEL) {
+            if ((mMode & MODE_LEVEL) == MODE_LEVEL)
+            {
                 sb.append(':');
                 sb.append(mLogLevel);
             }
 
-            if ((mMode & MODE_TAG) == MODE_TAG) {
+            if ((mMode & MODE_TAG) == MODE_TAG)
+            {
                 sb.append(':');
                 sb.append(mTag);
             }
@@ -379,7 +431,8 @@ public class LogCatWrapper {
             return sb.toString();
         }
 
-        public boolean loadFromString(String string) {
+        public boolean loadFromString(String string)
+        {
             String[] segments = string.split(":"); // $NON-NLS-1$
             int index = 0;
 
@@ -389,99 +442,127 @@ public class LogCatWrapper {
             // get the mode
             mMode = Integer.parseInt(segments[index++]);
 
-            if ((mMode & MODE_PID) == MODE_PID) {
+            if ((mMode & MODE_PID) == MODE_PID)
+            {
                 mPid = Integer.parseInt(segments[index++]);
             }
 
-            if ((mMode & MODE_LEVEL) == MODE_LEVEL) {
+            if ((mMode & MODE_LEVEL) == MODE_LEVEL)
+            {
                 mLogLevel = Integer.parseInt(segments[index++]);
             }
 
-            if ((mMode & MODE_TAG) == MODE_TAG) {
+            if ((mMode & MODE_TAG) == MODE_TAG)
+            {
                 mTag = segments[index++];
             }
 
             return true;
         }
 
-        void setOutput(FilterOutput out) {
+        void setOutput(FilterOutput out)
+        {
             mOutputInterface = out;
         }
 
-        /** Sets the name of the filter. */
-        void setName(String name) {
+        /**
+         * Sets the name of the filter.
+         */
+        void setName(String name)
+        {
             mName = name;
         }
 
         /**
          * Returns the UI display name.
          */
-        public String getName() {
+        public String getName()
+        {
             return mName;
         }
 
         /**
          * Resets the filtering mode to be 0 (i.e. no filter).
          */
-        public void resetFilteringMode() {
+        public void resetFilteringMode()
+        {
             mMode = 0;
         }
 
         /**
          * Returns the current filtering mode.
+         *
          * @return A bitmask. Possible values are MODE_PID, MODE_TAG, MODE_LEVEL
          */
-        public int getFilteringMode() {
+        public int getFilteringMode()
+        {
             return mMode;
         }
 
         /**
          * Adds PID to the current filtering mode.
+         *
          * @param pid
          */
-        public void setPidMode(int pid) {
-            if (pid != -1) {
+        public void setPidMode(int pid)
+        {
+            if (pid != -1)
+            {
                 mMode |= MODE_PID;
-            } else {
+            }
+            else
+            {
                 mMode &= ~MODE_PID;
             }
             mPid = pid;
         }
 
-        /** Returns the pid filter if valid, otherwise -1 */
-        public int getPidFilter() {
-            if ((mMode & MODE_PID) == MODE_PID)
-                return mPid;
+        /**
+         * Returns the pid filter if valid, otherwise -1
+         */
+        public int getPidFilter()
+        {
+            if ((mMode & MODE_PID) == MODE_PID) return mPid;
             return -1;
         }
 
-        public void setTagMode(String tag) {
-            if (tag != null && tag.length() > 0) {
+        public void setTagMode(String tag)
+        {
+            if (tag != null && tag.length() > 0)
+            {
                 mMode |= MODE_TAG;
-            } else {
+            }
+            else
+            {
                 mMode &= ~MODE_TAG;
             }
             mTag = tag;
         }
 
-        public String getTagFilter() {
-            if ((mMode & MODE_TAG) == MODE_TAG)
-                return mTag;
+        public String getTagFilter()
+        {
+            if ((mMode & MODE_TAG) == MODE_TAG) return mTag;
             return null;
         }
 
-        public void setLogLevel(int level) {
-            if (level == -1) {
+        public void setLogLevel(int level)
+        {
+            if (level == -1)
+            {
                 mMode &= ~MODE_LEVEL;
-            } else {
+            }
+            else
+            {
                 mMode |= MODE_LEVEL;
                 mLogLevel = level;
             }
 
         }
 
-        public int getLogLevel() {
-            if ((mMode & MODE_LEVEL) == MODE_LEVEL) {
+        public int getLogLevel()
+        {
+            if ((mMode & MODE_LEVEL) == MODE_LEVEL)
+            {
                 return mLogLevel;
             }
 
@@ -493,14 +574,19 @@ public class LogCatWrapper {
          * <p/>The new message is filtered through {@link #accept(LogMessage)}.
          * Calls to {@link #flush()} from a UI thread will display it (and other
          * pending messages) to the associated {@link Table}.
+         *
          * @param logMessage the MessageData object to filter
          * @return true if the message was accepted.
          */
-        public boolean addMessage(LogMessage newMessage, LogMessage oldMessage) {
-            synchronized (mMessages) {
-                if (oldMessage != null) {
+        public boolean addMessage(LogMessage newMessage, LogMessage oldMessage)
+        {
+            synchronized (mMessages)
+            {
+                if (oldMessage != null)
+                {
                     int index = mMessages.indexOf(oldMessage);
-                    if (index != -1) {
+                    if (index != -1)
+                    {
                         // TODO check that index will always be -1 or 0, as only the oldest message is ever removed.
                         mMessages.remove(index);
                         mRemovedMessageCount++;
@@ -509,7 +595,8 @@ public class LogCatWrapper {
                     // now we look for it in mNewMessages. This can happen if the new message is added
                     // and then removed because too many messages are added between calls to #flush()
                     index = mNewMessages.indexOf(oldMessage);
-                    if (index != -1) {
+                    if (index != -1)
+                    {
                         // TODO check that index will always be -1 or 0, as only the oldest message is ever removed.
                         mNewMessages.remove(index);
                     }
@@ -517,7 +604,8 @@ public class LogCatWrapper {
 
                 boolean filter = accept(newMessage);
 
-                if (filter) {
+                if (filter)
+                {
                     // at this point the message is accepted, we add it to the list
                     mMessages.add(newMessage);
                     mNewMessages.add(newMessage);
@@ -530,7 +618,8 @@ public class LogCatWrapper {
         /**
          * Removes all the items in the filter and its {@link Table}.
          */
-        public void clear() {
+        public void clear()
+        {
             mRemovedMessageCount = 0;
             mNewMessages.clear();
             mMessages.clear();
@@ -538,43 +627,54 @@ public class LogCatWrapper {
 
         /**
          * Filters a message.
+         *
          * @param logMessage the Message
          * @return true if the message is accepted by the filter.
          */
-        boolean accept(LogMessage logMessage) {
+        boolean accept(LogMessage logMessage)
+        {
             // do the regular filtering now
-            if ((mMode & MODE_PID) == MODE_PID && mPid != logMessage.data.pid) {
+            if ((mMode & MODE_PID) == MODE_PID && mPid != logMessage.data.pid)
+            {
                 return false;
             }
 
-            if ((mMode & MODE_TAG) == MODE_TAG && (
-                    logMessage.data.tag == null ||
-                    logMessage.data.tag.equals(mTag) == false)) {
+            if ((mMode & MODE_TAG) == MODE_TAG && (logMessage.data.tag == null || logMessage.data.tag.equals(mTag) == false))
+            {
                 return false;
             }
 
             int msgLogLevel = logMessage.data.logLevel.getPriority();
 
             // test the temp log filtering first, as it replaces the old one
-            if (mTempLogLevel != -1) {
-                if (mTempLogLevel > msgLogLevel) {
+            if (mTempLogLevel != -1)
+            {
+                if (mTempLogLevel > msgLogLevel)
+                {
                     return false;
                 }
-            } else if ((mMode & MODE_LEVEL) == MODE_LEVEL &&
-                    mLogLevel > msgLogLevel) {
+            }
+            else if ((mMode & MODE_LEVEL) == MODE_LEVEL && mLogLevel > msgLogLevel)
+            {
                 return false;
             }
 
             // do the temp filtering now.
-            if (mTempKeywordFilters != null) {
+            if (mTempKeywordFilters != null)
+            {
                 String msg = logMessage.msg;
 
-                for (String kw : mTempKeywordFilters) {
-                    try {
-                        if (msg.contains(kw) == false && msg.matches(kw) == false) {
+                for (String kw : mTempKeywordFilters)
+                {
+                    try
+                    {
+                        if (msg.contains(kw) == false && msg.matches(kw) == false)
+                        {
                             return false;
                         }
-                    } catch (PatternSyntaxException e) {
+                    }
+                    catch (PatternSyntaxException e)
+                    {
                         // if the string is not a valid regular expression,
                         // this exception is thrown.
                         return false;
@@ -582,12 +682,15 @@ public class LogCatWrapper {
                 }
             }
 
-            if (mTempPid != -1 && mTempPid != logMessage.data.pid) {
-               return false;
+            if (mTempPid != -1 && mTempPid != logMessage.data.pid)
+            {
+                return false;
             }
 
-            if (mTempTag != null && mTempTag.length() > 0) {
-                if (mTempTag.equals(logMessage.data.tag) == false) {
+            if (mTempTag != null && mTempTag.length() > 0)
+            {
+                if (mTempTag.equals(logMessage.data.tag) == false)
+                {
                     return false;
                 }
             }
@@ -599,105 +702,113 @@ public class LogCatWrapper {
          * Takes all the accepted messages and display them.
          * This must be called from a UI thread.
          */
-//        @UiThread
-        public void flush() {
-//            // if scroll bar is at the bottom, we will scroll
-//            ScrollBar bar = mTable.getVerticalBar();
-//            boolean scroll = bar.getMaximum() == bar.getSelection() + bar.getThumb();
-//
-//            // if we are not going to scroll, get the current first item being shown.
-//            int topIndex = mTable.getTopIndex();
-//
-//            // disable drawing
-//            mTable.setRedraw(false);
-//
-//            int totalCount = mNewMessages.size();
-//
-//            try {
-//                // remove the items of the old messages.
-//                for (int i = 0 ; i < mRemovedMessageCount && mTable.getItemCount() > 0 ; i++) {
-//                    mTable.remove(0);
-//                }
-//
-//                if (mUnreadCount > mTable.getItemCount()) {
-//                    mUnreadCount = mTable.getItemCount();
-//                }
-//
-//                // add the new items
-//                for (int i = 0  ; i < totalCount ; i++) {
-//                    LogMessage msg = mNewMessages.get(i);
-//                    addTableItem(msg);
-//                }
-//            } catch (SWTException e) {
-//                // log the error and keep going. Content of the logcat table maybe unexpected
-//                // but at least ddms won't crash.
-//                Log.e("LogFilter", e);
-//            }
-//
-//            // redraw
-//            mTable.setRedraw(true);
-//
-//            // scroll if needed, by showing the last item
-//            if (scroll) {
-//                totalCount = mTable.getItemCount();
-//                if (totalCount > 0) {
-//                    mTable.showItem(mTable.getItem(totalCount-1));
-//                }
-//            } else if (mRemovedMessageCount > 0) {
-//                // we need to make sure the topIndex is still visible.
-//                // Because really old items are removed from the list, this could make it disappear
-//                // if we don't change the scroll value at all.
-//
-//                topIndex -= mRemovedMessageCount;
-//                if (topIndex < 0) {
-//                    // looks like it disappeared. Lets just show the first item
-//                    mTable.showItem(mTable.getItem(0));
-//                } else {
-//                    mTable.showItem(mTable.getItem(topIndex));
-//                }
-//            }
-//
-//            // if this filter is not the current one, we update the tab text
-//            // with the amount of unread message
-//            if (mIsCurrentTabItem == false) {
-//                mUnreadCount += mNewMessages.size();
-//                totalCount = mTable.getItemCount();
-//                if (mUnreadCount > 0) {
-//                    mTabItem.setText(mName + " (" // $NON-NLS-1$
-//                            + (mUnreadCount > totalCount ? totalCount : mUnreadCount)
-//                            + ")");  // $NON-NLS-1$
-//                } else {
-//                    mTabItem.setText(mName);  // $NON-NLS-1$
-//                }
-//            }
-//
-            if (mOutputInterface != null) {
+        //        @UiThread
+        public void flush()
+        {
+            //            // if scroll bar is at the bottom, we will scroll
+            //            ScrollBar bar = mTable.getVerticalBar();
+            //            boolean scroll = bar.getMaximum() == bar.getSelection() + bar.getThumb();
+            //
+            //            // if we are not going to scroll, get the current first item being shown.
+            //            int topIndex = mTable.getTopIndex();
+            //
+            //            // disable drawing
+            //            mTable.setRedraw(false);
+            //
+            //            int totalCount = mNewMessages.size();
+            //
+            //            try {
+            //                // remove the items of the old messages.
+            //                for (int i = 0 ; i < mRemovedMessageCount && mTable.getItemCount() > 0 ; i++) {
+            //                    mTable.remove(0);
+            //                }
+            //
+            //                if (mUnreadCount > mTable.getItemCount()) {
+            //                    mUnreadCount = mTable.getItemCount();
+            //                }
+            //
+            //                // add the new items
+            //                for (int i = 0  ; i < totalCount ; i++) {
+            //                    LogMessage msg = mNewMessages.get(i);
+            //                    addTableItem(msg);
+            //                }
+            //            } catch (SWTException e) {
+            //                // log the error and keep going. Content of the logcat table maybe unexpected
+            //                // but at least ddms won't crash.
+            //                Log.e("LogFilter", e);
+            //            }
+            //
+            //            // redraw
+            //            mTable.setRedraw(true);
+            //
+            //            // scroll if needed, by showing the last item
+            //            if (scroll) {
+            //                totalCount = mTable.getItemCount();
+            //                if (totalCount > 0) {
+            //                    mTable.showItem(mTable.getItem(totalCount-1));
+            //                }
+            //            } else if (mRemovedMessageCount > 0) {
+            //                // we need to make sure the topIndex is still visible.
+            //                // Because really old items are removed from the list, this could make it disappear
+            //                // if we don't change the scroll value at all.
+            //
+            //                topIndex -= mRemovedMessageCount;
+            //                if (topIndex < 0) {
+            //                    // looks like it disappeared. Lets just show the first item
+            //                    mTable.showItem(mTable.getItem(0));
+            //                } else {
+            //                    mTable.showItem(mTable.getItem(topIndex));
+            //                }
+            //            }
+            //
+            //            // if this filter is not the current one, we update the tab text
+            //            // with the amount of unread message
+            //            if (mIsCurrentTabItem == false) {
+            //                mUnreadCount += mNewMessages.size();
+            //                totalCount = mTable.getItemCount();
+            //                if (mUnreadCount > 0) {
+            //                    mTabItem.setText(mName + " (" // $NON-NLS-1$
+            //                            + (mUnreadCount > totalCount ? totalCount : mUnreadCount)
+            //                            + ")");  // $NON-NLS-1$
+            //                } else {
+            //                    mTabItem.setText(mName);  // $NON-NLS-1$
+            //                }
+            //            }
+            //
+            if (mOutputInterface != null)
+            {
                 mOutputInterface.out(mName, mNewMessages.toArray(new LogMessage[mNewMessages.size()]), mRemovedMessageCount);
             }
             mNewMessages.clear();
         }
 
-        void setColors(LogColors colors) {
+        void setColors(LogColors colors)
+        {
             mColors = colors;
         }
 
-        void setTempKeywordFiltering(String[] segments) {
+        void setTempKeywordFiltering(String[] segments)
+        {
             mTempKeywordFilters = segments;
             mTempFilteringStatus = true;
         }
 
-        void setTempPidFiltering(int pid) {
+        void setTempPidFiltering(int pid)
+        {
             mTempPid = pid;
             mTempFilteringStatus = true;
         }
 
-        void setTempTagFiltering(String tag) {
+        void setTempTagFiltering(String tag)
+        {
             mTempTag = tag;
             mTempFilteringStatus = true;
         }
 
-        void resetTempFiltering() {
-            if (mTempPid != -1 || mTempTag != null || mTempKeywordFilters != null) {
+        void resetTempFiltering()
+        {
+            if (mTempPid != -1 || mTempTag != null || mTempKeywordFilters != null)
+            {
                 mTempFilteringStatus = true;
             }
 
@@ -706,11 +817,13 @@ public class LogCatWrapper {
             mTempKeywordFilters = null;
         }
 
-        void resetTempFilteringStatus() {
+        void resetTempFilteringStatus()
+        {
             mTempFilteringStatus = false;
         }
 
-        boolean getTempFilterStatus() {
+        boolean getTempFilterStatus()
+        {
             return mTempFilteringStatus;
         }
 
@@ -719,148 +832,29 @@ public class LogCatWrapper {
          * Add a TableItem for the index-th item of the buffer
          * @param filter The index of the table in which to insert the item.
          */
-//        private void addTableItem(LogMessage msg) {
-//            TableItem item = new TableItem(mTable, SWT.NONE);
-//            item.setText(0, msg.data.time);
-//            item.setText(1, new String(new char[] { msg.data.logLevel.getPriorityLetter() }));
-//            item.setText(2, msg.data.pidString);
-//            item.setText(3, msg.data.tag);
-//            item.setText(4, msg.msg);
-//
-//            // add the buffer index as data
-//            item.setData(msg);
-//
-//            if (msg.data.logLevel == LogLevel.INFO) {
-//                item.setForeground(mColors.infoColor);
-//            } else if (msg.data.logLevel == LogLevel.DEBUG) {
-//                item.setForeground(mColors.debugColor);
-//            } else if (msg.data.logLevel == LogLevel.ERROR) {
-//                item.setForeground(mColors.errorColor);
-//            } else if (msg.data.logLevel == LogLevel.WARN) {
-//                item.setForeground(mColors.warningColor);
-//            } else {
-//                item.setForeground(mColors.verboseColor);
-//            }
-//        }
+        //        private void addTableItem(LogMessage msg) {
+        //            TableItem item = new TableItem(mTable, SWT.NONE);
+        //            item.setText(0, msg.data.time);
+        //            item.setText(1, new String(new char[] { msg.data.logLevel.getPriorityLetter() }));
+        //            item.setText(2, msg.data.pidString);
+        //            item.setText(3, msg.data.tag);
+        //            item.setText(4, msg.msg);
+        //
+        //            // add the buffer index as data
+        //            item.setData(msg);
+        //
+        //            if (msg.data.logLevel == LogLevel.INFO) {
+        //                item.setForeground(mColors.infoColor);
+        //            } else if (msg.data.logLevel == LogLevel.DEBUG) {
+        //                item.setForeground(mColors.debugColor);
+        //            } else if (msg.data.logLevel == LogLevel.ERROR) {
+        //                item.setForeground(mColors.errorColor);
+        //            } else if (msg.data.logLevel == LogLevel.WARN) {
+        //                item.setForeground(mColors.warningColor);
+        //            } else {
+        //                item.setForeground(mColors.verboseColor);
+        //            }
+        //        }
     }
 
-    /**
-     * Base implementation of {@link IShellOutputReceiver}, that takes the raw data coming from the
-     * socket, and convert it into {@link String} objects.
-     * <p/>Additionally, it splits the string by lines.
-     * <p/>Classes extending it must implement {@link #processNewLines(String[])} which receives
-     * new parsed lines as they become available.
-     */
-    protected class LogCatOutputReceiver implements AdbWrapper.ShellOutputReceiver
-    {
-        private boolean isCancelled = false;
-
-        private boolean mTrimLines = true;
-
-        /** unfinished message line, stored for next packet */
-        private String mUnfinishedLine = null;
-
-        private final ArrayList<String> mArray = new ArrayList<String>();
-
-        /**
-         * Set the trim lines flag.
-         * @param trim hether the lines are trimmed, or not.
-         */
-        public void setTrimLine(boolean trim) {
-            mTrimLines = trim;
-        }
-
-        /* (non-Javadoc)
-         * @see com.android.ddmlib.adb.IShellOutputReceiver#addOutput(
-         *      byte[], int, int)
-         */
-        public final void addOutput(byte[] data, int offset, int length) {
-            if (isCancelled() == false) {
-                String s = null;
-                try {
-                    s = new String(data, offset, length, "ISO-8859-1"); //$NON-NLS-1$
-                } catch (UnsupportedEncodingException e) {
-                    // normal encoding didn't work, try the default one
-                    s = new String(data, offset,length);
-                }
-
-                // ok we've got a string
-                if (s != null) {
-                    // if we had an unfinished line we add it.
-                    if (mUnfinishedLine != null) {
-                        s = mUnfinishedLine + s;
-                        mUnfinishedLine = null;
-                    }
-
-                    // now we split the lines
-                    mArray.clear();
-                    int start = 0;
-                    do {
-                        int index = s.indexOf("\r\n", start); //$NON-NLS-1$
-
-                        // if \r\n was not found, this is an unfinished line
-                        // and we store it to be processed for the next packet
-                        if (index == -1) {
-                            mUnfinishedLine = s.substring(start);
-                            break;
-                        }
-
-                        // so we found a \r\n;
-                        // extract the line
-                        String line = s.substring(start, index);
-                        if (mTrimLines) {
-                            line = line.trim();
-                        }
-                        mArray.add(line);
-
-                        // move start to after the \r\n we found
-                        start = index + 2;
-                    } while (true);
-
-                    if (mArray.size() > 0) {
-                        // at this point we've split all the lines.
-                        // make the array
-                        String[] lines = mArray.toArray(new String[mArray.size()]);
-
-                        // send it for final processing
-                        processNewLines(lines);
-                    }
-                }
-            }
-        }
-
-        /* (non-Javadoc)
-         * @see com.android.ddmlib.adb.IShellOutputReceiver#flush()
-         */
-        public final void flush() {
-            if (mUnfinishedLine != null) {
-                processNewLines(new String[] { mUnfinishedLine });
-            }
-
-            done();
-        }
-
-        /**
-         * Terminates the process. This is called after the last lines have been through
-         * {@link #processNewLines(String[])}.
-         */
-        public void done() {
-            // do nothing.
-        }
-
-        /**
-         * Called when new lines are being received by the remote process.
-         * <p/>It is guaranteed that the lines are complete when they are given to this method.
-         * @param lines The array containing the new lines.
-         */
-        public void processNewLines(String[] lines) {
-            addLog(lines);
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return isCancelled;
-        }
-
-    }
 }
