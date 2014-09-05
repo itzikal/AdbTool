@@ -41,6 +41,8 @@ public class AdbWrapper
 
     private Device mDevice;
 
+    private adbTool.core.ShellOutputReceiver dummyOutput = new adbTool.core.ShellOutputReceiver(null, null);
+
     public void getPackages(ShellOutputReceiver reciver, String... args)
     {
         executeShellCommand(reciver, "pm", "list", "packages", "-3", "-e");
@@ -94,7 +96,12 @@ public class AdbWrapper
         String replacePriod = replaceSpaces.replace(".", " && input keyevent 56 && input text ");
         String replaceComma = replacePriod.replace(",", " && input keyevent 55 && input text ");
         String concat = "input text ".concat(replaceComma);
-        executeShellCommand(concat, new adbTool.core.ShellOutputReceiver(null, null));
+        executeShellCommand(concat, dummyOutput);
+    }
+
+    public void clearAppData(String packageName)
+    {
+        executeShellCommand(dummyOutput,"pm", "clear", packageName);
     }
 
     /**

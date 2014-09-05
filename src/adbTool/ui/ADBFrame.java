@@ -133,6 +133,14 @@ public class ADBFrame extends javax.swing.JFrame
 
         _clearLogcatButton.addActionListener(arg0 -> ADBLogcat.getInstance().clearLogcat());
 
+        _clearAppData.addActionListener(arg ->
+        {
+            String selectedValue = (String)_packages.getSelectedValue();
+            if(selectedValue == null) return;
+            AdbWrapper.getInstance().clearAppData(selectedValue);
+        });
+
+
         _filterTextBox.addActionListener(evt -> filterTextBoxActionPerformed(evt));
 
         _filterTextBox.getDocument().addDocumentListener(new DocumentListener()
