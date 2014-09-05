@@ -16,7 +16,7 @@ import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import adbTool.ADBWrapper;
+import adbTool.core.AdbWrapper;
 
 public class ChooseAndInstallAPKDialog extends javax.swing.JDialog
 {
@@ -89,10 +89,7 @@ public class ChooseAndInstallAPKDialog extends javax.swing.JDialog
     {
         _install = new JButton();
         _install.setText("Install");
-        _install.addActionListener(actionEvent ->
-        {
-            Process installProcess = ADBWrapper.getInstance().installApk(_filename.getText());
-        });
+        _install.addActionListener(actionEvent ->AdbWrapper.getInstance().installApk(_filename.getText()));
     }
 
     private void initBrowseButton()

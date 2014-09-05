@@ -135,10 +135,10 @@ public class ADBWrapper
     //    }
 
 
-    public Process installApk(String filename)
-    {
-        return executeADBCommand("install", filename);
-    }
+//    public Process installApk(String filename)
+//    {
+//        return executeADBCommand("install", filename);
+//    }
 
     public AndroidPackage getActivePackage()
     {

@@ -5,7 +5,6 @@ import com.android.ddmlib.IDevice;
 import java.io.IOException;
 
 import adbTool.core.AdbWrapper;
-import adbTool.core.Util;
 
 /**
  * Created by Itzik on 31/08/2014.
@@ -80,10 +79,23 @@ public class Device
         return _device.getSerialNumber();
     }
 
+    public void installPackage(String file, boolean x)
+    {
+        try
+        {
+            _device.installPackage(file, x);
+        }
+        catch (IOException e)
+        {
+
+            e.printStackTrace();
+        }
+    }
     public boolean executeShellCommand(String shellCmd, AdbWrapper.ShellOutputReceiver receiver, int i)
     {
         try
         {
+
             _device.executeShellCommand(shellCmd, receiver, i);
         }
         catch (IOException e)

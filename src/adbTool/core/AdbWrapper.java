@@ -211,6 +211,13 @@ public class AdbWrapper
         return null;
     }
 
+    public void installApk(String apk)
+    {
+        if(mDevice !=null)
+        {
+            mDevice.installPackage(apk, false);
+        }
+    }
     private class ClientChangeListener implements IClientChangeListener
     {
         @Override
