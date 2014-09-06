@@ -22,6 +22,11 @@ public class Device
         _device = device;
     }
 
+    public IDevice getDevice()
+    {
+        return _device;
+    }
+
     public String getIDeviceId()
     {
         return _device.getSerialNumber();
@@ -29,49 +34,55 @@ public class Device
 
     public String getManufacturer()
     {
-        return _manufacturer;
+        return _device.getProperty("ro.product.manufacturer");
     }
 
-    public void setManufacturer(String _manufacturer)
-    {
-        this._manufacturer = _manufacturer;
-    }
+//    public void setManufacturer(String _manufacturer)
+//    {
+//        this._manufacturer = _manufacturer;
+//    }
 
     public String getModel()
     {
-        return _model;
+        return _device.getProperty("ro.product.model");
     }
 
-    public void setModel(String _model)
-    {
-        this._model = _model;
-    }
+//    public void setModel(String _model)
+//    {
+//        this._model = _model;
+//    }
 
-    public void setRelease(String release)
-    {
-        this._release = release;
-    }
+//    public void setRelease(String release)
+//    {
+//        this._release = release;
+//    }
 
     public String getRelease()
     {
-        return _release;
+        return _device.getProperty("ro.build.version.release");
     }
 
-    public void setSDK(String sdk)
-    {
-        this._sdk = sdk;
-    }
+//    public void setSDK(String sdk)
+//    {
+//        this._sdk = sdk;
+//    }
 
     public String getSDK()
     {
-        return _sdk;
+        return _device.getProperty("ro.build.version.sdk");
     }
 
     @Override
     public String toString()
     {
-        return _device.getSerialNumber();
-                //String.format("%s %s %s (API %s)", _manufacturer.toUpperCase(), _model, _release, _sdk);
+        try
+        {
+            return String.format("%s %s %s (API %s)", getManufacturer().toUpperCase(), getModel(), getRelease(), getSDK());
+        }
+        catch (Exception e)
+        {
+            return getIDeviceId();
+        }
     }
 
     public String getSerialNumber()

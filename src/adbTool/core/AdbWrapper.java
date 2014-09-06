@@ -281,6 +281,15 @@ public class AdbWrapper
         public void deviceChanged(IDevice device, int changeMask)
         {
             Util.DbgLog();
+
+
+
+            //            Client[] clients = device.getClients();
+//            Map<String, String> properties = device.getProperties();
+//            for (String key: properties.keySet())
+//            {
+//                Util.DbgLog("key: "+key +", value: " +properties.get(key));
+//            }
         }
     }
 }

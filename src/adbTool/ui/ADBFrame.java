@@ -44,8 +44,7 @@ public class ADBFrame extends javax.swing.JFrame
             @Override
             public void deviceDisconnected(Device device)
             {
-                Util.DbgLog("device removed " + device.getSerialNumber());
-                runInEventThread(() ->{ _devices.removeItem(device);_devices.updateUI();}, true);
+                runInEventThread(() ->{ _devices.removeItem(device);}, true);
             }
         });
 
