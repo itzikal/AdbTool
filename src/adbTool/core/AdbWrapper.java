@@ -104,6 +104,11 @@ public class AdbWrapper
         executeShellCommand(dummyOutput,"pm", "clear", packageName);
     }
 
+    public Device getActiveDevice()
+    {
+        return mDevice;
+    }
+
     /**
      * Interface to listen device connection states.
      */
@@ -175,6 +180,7 @@ public class AdbWrapper
         AndroidDebugBridge.addDeviceChangeListener(mDeviceChangeListener);
 
         AndroidDebugBridge.createBridge();//adbFilePath true);
+
         //adbFilePath, true /* forceNewBridge */);
         mIsAdbInitialized = true;
         return true;
@@ -207,6 +213,7 @@ public class AdbWrapper
         {
             return;
         }
+        Util.DbgLog("About to execute shell command: " + shellCmd);
         new Thread(()->mDevice.executeShellCommand(shellCmd, receiver, 0 /*timeout*/)).start();
     }
 

@@ -10,7 +10,6 @@ import javax.swing.event.DocumentListener;
 import adbTool.ADBLogcat;
 import adbTool.core.AdbWrapper;
 import adbTool.core.ShellOutputReceiver;
-import adbTool.core.Util;
 import adbTool.models.AndroidPackage;
 import adbTool.models.Device;
 import adbTool.models.LogcatLevel;
@@ -31,7 +30,7 @@ public class ADBFrame extends javax.swing.JFrame
         setActions();
         //refreshDeviceList();
 
-//        setActivePackage();
+        //        setActivePackage();
         _packages.setModel(_sortedPackageListModel);
 
         AdbWrapper.getInstance().connect(" ", new AdbWrapper.DeviceConnectionListener()
@@ -41,10 +40,26 @@ public class ADBFrame extends javax.swing.JFrame
             {
                 runInEventThread(() -> _devices.addItem(device), true);
             }
+
             @Override
             public void deviceDisconnected(Device device)
             {
-                runInEventThread(() ->{ _devices.removeItem(device);}, true);
+                runInEventThread(() ->
+                {
+                    try
+                    {
+                        if(AdbWrapper.getInstance().getActiveDevice() == _devices.getSelectedItem())
+                        {
+                            AdbWrapper.getInstance().setDevice(null);
+                        }
+                        _devices.removeItem(device);
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                    onDeviceChanged();
+                }, true);
             }
         });
 
@@ -74,33 +89,41 @@ public class ADBFrame extends javax.swing.JFrame
     private void refreshPackages()
     {
         _sortedPackageListModel.clear();
-        AdbWrapper.getInstance()
-                .getPackages(new ShellOutputReceiver(null, results -> addPackagesFromShellResult(results)));
+        AdbWrapper.getInstance().getPackages(new ShellOutputReceiver(null, results -> addPackagesFromShellResult(results)));
     }
 
     private void addPackagesFromShellResult(String[] results)
     {
-        runInEventThread(()->{
-        for (String s :results)
-        {
-            if(s.contains(":"))
+        runInEventThread(() -> {
+            for (String s : results)
             {
-                s = s.split(":")[1];
+                if (s.contains(":"))
+                {
+                    s = s.split(":")[1];
+                }
+                _sortedPackageListModel.add(s);
             }
-            _sortedPackageListModel.add(s);
-        }}, false);
+        }, false);
     }
 
     private void setActivePackage()
     {
-        AdbWrapper.getInstance().getActivePackage(new AdbWrapper.ShellCommandResult<AndroidPackage>() {
+        _activePackageName.setText("");
+        AdbWrapper.getInstance().getActivePackage(new AdbWrapper.ShellCommandResult<AndroidPackage>()
+        {
             @Override
             public <T> void onCommandResult(T result)
             {
-                _activePackage =(AndroidPackage)result;
-                runInEventThread(()->  _activePackageName.setText(_activePackage.getName()), false);
+                _activePackage = (AndroidPackage) result;
+                runInEventThread(() -> _activePackageName.setText(_activePackage.getName()), false);
             }
         });
+    }
+
+    private void onDeviceChanged()
+    {
+        refreshPackages();
+        setActivePackage();
     }
 
     private void setActions()
@@ -116,14 +139,9 @@ public class ADBFrame extends javax.swing.JFrame
 
         _devices.addActionListener(event -> {
             Device selectedItem = (Device) _devices.getSelectedItem();
-            Util.DbgLog("Selected device changed: " + selectedItem.toString());
-            if (selectedItem == null)
-            {
-                return;
-            }
+         //   Util.DbgLog("Selected device changed: " + selectedItem == null ? "no devices" : selectedItem.toString());
             AdbWrapper.getInstance().setDevice(selectedItem);
-            refreshPackages();
-            setActivePackage();
+            onDeviceChanged();
         });
         _installAPKButoon.addActionListener(arg0 -> {
             ChooseAndInstallAPKDialog dialog = new ChooseAndInstallAPKDialog(ADBFrame.this, true);
@@ -132,10 +150,9 @@ public class ADBFrame extends javax.swing.JFrame
 
         _clearLogcatButton.addActionListener(arg0 -> ADBLogcat.getInstance().clearLogcat());
 
-        _clearAppData.addActionListener(arg ->
-        {
-            String selectedValue = (String)_packages.getSelectedValue();
-            if(selectedValue == null) return;
+        _clearAppData.addActionListener(arg -> {
+            String selectedValue = (String) _packages.getSelectedValue();
+            if (selectedValue == null) return;
             AdbWrapper.getInstance().clearAppData(selectedValue);
         });
 
@@ -277,20 +294,20 @@ public class ADBFrame extends javax.swing.JFrame
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Packages"));
 
-//        _packages.setModel(new javax.swing.AbstractListModel()
-//        {
-//            String[] strings = {"Item 1", "Item 2", "Item 3", "Item 4", "Item 5"};
-//
-//            public int getSize()
-//            {
-//                return strings.length;
-//            }
-//
-//            public Object getElementAt(int i)
-//            {
-//                return strings[i];
-//            }
-//        });
+        //        _packages.setModel(new javax.swing.AbstractListModel()
+        //        {
+        //            String[] strings = {"Item 1", "Item 2", "Item 3", "Item 4", "Item 5"};
+        //
+        //            public int getSize()
+        //            {
+        //                return strings.length;
+        //            }
+        //
+        //            public Object getElementAt(int i)
+        //            {
+        //                return strings[i];
+        //            }
+        //        });
         jScrollPane2.setViewportView(_packages);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
