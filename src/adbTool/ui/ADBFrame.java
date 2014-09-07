@@ -1,8 +1,13 @@
 package adbTool.ui;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -12,6 +17,7 @@ import adbTool.core.AdbWrapper;
 import adbTool.core.ShellOutputReceiver;
 import adbTool.models.AndroidPackage;
 import adbTool.models.Device;
+import adbTool.models.LogcatItem;
 import adbTool.models.LogcatLevel;
 
 public class ADBFrame extends javax.swing.JFrame
@@ -128,6 +134,29 @@ public class ADBFrame extends javax.swing.JFrame
 
     private void setActions()
     {
+        _save.addActionListener(event->
+        {
+            String filename = openSaveLogToFileDialog();
+            if(filename == null) return;
+
+            PrintWriter out = null;
+            try
+            {
+                out = new PrintWriter(filename);
+            }
+            catch (FileNotFoundException e)
+            {
+                e.printStackTrace();
+            }
+            if(out == null)
+                return;
+            DefaultListModel<LogcatItem> itemList = ((LogcatTableModel) _logcatTable.getModel()).getItemList();
+            for(Object item :itemList.toArray())
+            {
+                String logcatString = ((LogcatItem) item).getLogcatString();
+                out.println(logcatString);
+            }
+        });
         _devices.removeAllItems();
         _startLogcat.addActionListener(arg0 -> ADBLogcat.getInstance().startLogcat());
 
@@ -183,6 +212,18 @@ public class ADBFrame extends javax.swing.JFrame
         });
 
         _sendTextButton.addActionListener(arg0 -> new SendTextDialog(ADBFrame.this, true).run());
+    }
+
+    private String openSaveLogToFileDialog()
+    {
+        JFileChooser fc = new JFileChooser();
+        fc.setAcceptAllFileFilterUsed(false);
+        if (fc.showOpenDialog(ADBFrame.this) == JFileChooser.APPROVE_OPTION)
+        {
+            File file = fc.getSelectedFile();
+            return file.getPath();
+        }
+        return null;
     }
 
     private void filterTextBoxActionPerformed(java.awt.event.ActionEvent evt)

@@ -15,7 +15,7 @@ public class LogcatTableModel extends AbstractTableModel implements OnListChange
 	public static final String[] COLUMN_TITLES = new String[]{"Level", "Pid", "Application", "Tag", "Text"};
 	public static final Class<?>[] COLUMN_CLASSES = {LogcatLevel.class, String.class, String.class, String.class, String.class};
 	
-	DefaultListModel<LogcatItem> _logcatList = new DefaultListModel<LogcatItem>(); 
+	DefaultListModel<LogcatItem> _logcatList = new DefaultListModel<LogcatItem>();
 	
 	public LogcatTableModel()
 	{
@@ -75,4 +75,9 @@ public class LogcatTableModel extends AbstractTableModel implements OnListChange
 		_logcatList.clear();
 		fireTableRowsDeleted(0, getRowCount());
 	}
+
+    public DefaultListModel<LogcatItem> getItemList()
+    {
+        return _logcatList;
+    }
 }

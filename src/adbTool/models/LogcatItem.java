@@ -1,8 +1,6 @@
 package adbTool.models;
 
-import java.util.Date;
-
-public class LogcatItem  implements ILogcatItem 
+public class LogcatItem  implements ILogcatItem
 {
 	private String _logcatString;
 	private LogcatLevel _level;
@@ -54,7 +52,10 @@ public class LogcatItem  implements ILogcatItem
 		return _level;
 	}
 
-	
+	public String getLogcatString()
+    {
+        return _logcatString;
+    }
 
 	@Override
 	public String getApplication() 
