@@ -117,6 +117,8 @@ public class AdbWrapper
         void deviceConnected(Device devSerialNumber);
 
         void deviceDisconnected(Device devSerialNumber);
+
+        void deviceChanged(Device deviceModel);
     }
 
     public static interface ShellOutputReceiver extends IShellOutputReceiver
@@ -288,8 +290,11 @@ public class AdbWrapper
         public void deviceChanged(IDevice device, int changeMask)
         {
             Util.DbgLog();
-
-
+            Device deviceModel = findDevice(device.getSerialNumber());
+            if (mDeviceStateListener != null)
+            {
+                mDeviceStateListener.deviceChanged(deviceModel);
+            }
 
             //            Client[] clients = device.getClients();
 //            Map<String, String> properties = device.getProperties();

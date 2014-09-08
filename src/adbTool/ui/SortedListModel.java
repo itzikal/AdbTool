@@ -10,60 +10,60 @@ import java.util.TreeSet;
 import javax.swing.AbstractListModel;
 
 public class SortedListModel<T> extends AbstractListModel {
-    SortedSet<T> model;
+    SortedSet<T> _model;
 
     public SortedListModel() {
-        model = new TreeSet<T>();
+        _model = new TreeSet<T>();
     }
 
     public int getSize() {
-        return model.size();
+        return _model.size();
     }
 
     public T getElementAt(int index) {
-        return (T)model.toArray()[index];
+        return (T) _model.toArray()[index];
     }
 
     public void add(T element) {
-        if (model.add(element)) {
+        if (_model.add(element)) {
             fireContentsChanged(this, 0, getSize());
         }
     }
     public void addAll(T elements[]) {
         Collection<T> c = Arrays.asList(elements);
-        model.addAll(c);
+        _model.addAll(c);
         fireContentsChanged(this, 0, getSize());
     }
 
     public void addAll(ArrayList<T> array) {
         //Collection<Object> c = Arrays.asList(array);
-        model.addAll(array);
+        _model.addAll(array);
         fireContentsChanged(this, 0, getSize());
     }
 
     public void clear() {
-        model.clear();
+        _model.clear();
         fireContentsChanged(this, 0, getSize());
     }
 
     public boolean contains(T element) {
-        return model.contains(element);
+        return _model.contains(element);
     }
 
     public T firstElement() {
-        return model.first();
+        return _model.first();
     }
 
     public Iterator iterator() {
-        return model.iterator();
+        return _model.iterator();
     }
 
     public T lastElement() {
-        return model.last();
+        return _model.last();
     }
 
     public boolean removeElement(T element) {
-        boolean removed = model.remove(element);
+        boolean removed = _model.remove(element);
         if (removed) {
             fireContentsChanged(this, 0, getSize());
         }
