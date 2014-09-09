@@ -16,6 +16,7 @@
 
 package adbTool.core;
 
+import com.android.ddmlib.IShellOutputReceiver;
 import com.android.ddmlib.Log.LogLevel;
 
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public class LogCatWrapper
     private LogColors mDefaultFilterColor = null;
     private LogMessageInfo mLastMessageInfo = null;
     private String mDevSerialNumber = null;
-    private ShellOutputReceiver mReceiver = null;
+    private IShellOutputReceiver mReceiver = null;
 
     /**
      * @param devSerialNumber
@@ -73,7 +74,7 @@ public class LogCatWrapper
     /**
      * @return
      */
-    public AdbWrapper.ShellOutputReceiver getShellOutputReceiver()
+    public IShellOutputReceiver getShellOutputReceiver()
     {
         return mReceiver;
     }

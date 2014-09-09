@@ -1,5 +1,7 @@
 package adbTool.core;
 
+import com.android.ddmlib.IShellOutputReceiver;
+
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
@@ -10,8 +12,13 @@ import java.util.ArrayList;
  * <p/>Classes extending it must implement {@link #processNewLines(String[])} which receives
  * new parsed lines as they become available.
  */
-public class ShellOutputReceiver implements AdbWrapper.ShellOutputReceiver
+public class ShellOutputReceiver implements IShellOutputReceiver
 {
+    public void setFilter(String filter)
+    {
+        _filter = filter;
+    }
+
     public interface ShellOutputReceiverResults
     {
         void onResultReceived(String[] results);

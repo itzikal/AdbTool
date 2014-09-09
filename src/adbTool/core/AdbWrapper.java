@@ -121,9 +121,6 @@ public class AdbWrapper
         void deviceChanged(Device deviceModel);
     }
 
-    public static interface ShellOutputReceiver extends IShellOutputReceiver
-    {}
-
     public interface ShellCommandResult<T>
     {
         <T> void onCommandResult(T result);
@@ -209,7 +206,7 @@ public class AdbWrapper
         mDevice = device;
     }
 
-    public void executeShellCommand(String shellCmd, ShellOutputReceiver receiver)
+    public void executeShellCommand(String shellCmd, IShellOutputReceiver receiver)
     {
         if (mDevice == null)
         {
@@ -243,6 +240,12 @@ public class AdbWrapper
             mDevice.installPackage(apk, false);
         }
     }
+
+    public void getPidForPackage(String packageName, ShellOutputReceiver.ShellOutputReceiverResults receiver)
+    {
+        executeShellCommand(new ShellOutputReceiver(packageName, receiver), "ps");
+    }
+
     private class ClientChangeListener implements IClientChangeListener
     {
         @Override
@@ -303,5 +306,7 @@ public class AdbWrapper
 //                Util.DbgLog("key: "+key +", value: " +properties.get(key));
 //            }
         }
+
+
     }
 }

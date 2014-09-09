@@ -1,5 +1,7 @@
 package adbTool.ui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -25,6 +27,7 @@ public class ADBFrame extends javax.swing.JFrame
     //SortedListModel<String> _sortedPackageListModel = new SortedListModel<String>();
     SortedComboBoxModel<String> _sortedPackageCombobox = new SortedComboBoxModel<>();
     private AndroidPackage _activePackage;
+    private String _packagePid;
 
     /**
      * Creates new form ADBFrame
@@ -51,11 +54,10 @@ public class ADBFrame extends javax.swing.JFrame
             @Override
             public void deviceDisconnected(Device device)
             {
-                runInEventThread(() ->
-                {
+                runInEventThread(() -> {
                     try
                     {
-                        if(AdbWrapper.getInstance().getActiveDevice() == _devices.getSelectedItem())
+                        if (AdbWrapper.getInstance().getActiveDevice() == _devices.getSelectedItem())
                         {
                             AdbWrapper.getInstance().setDevice(null);
                         }
@@ -72,10 +74,29 @@ public class ADBFrame extends javax.swing.JFrame
             @Override
             public void deviceChanged(Device deviceModel)
             {
-                _devices.updateUI();
+                _devices.setRequestFocusEnabled(true);
+                //_devices.contentsChanged(new ListDataEvent(_devices.getSelectedItem(), 0,0, _devices.getItemCount()));
             }
         });
 
+    }
+
+    private void getPackagePid()
+    {
+        AdbWrapper.getInstance().getPidForPackage((String) _packagesCombobox.getSelectedItem(), results -> {
+            _packagePid = null;
+            if (results.length == 0)
+                    {
+                        return;
+                    }
+            String[] split = results[0].split(" ");
+            if(split.length > 3)
+            {
+                _packagePid = split[3];
+            }
+
+            ADBLogcat.getInstance().setLogcatPidFilter(_packagePid);
+                });
     }
 
     private void runInEventThread(Runnable r, boolean isSynchronous)
@@ -102,7 +123,12 @@ public class ADBFrame extends javax.swing.JFrame
     private void refreshPackages()
     {
         _sortedPackageCombobox.clear();
-        AdbWrapper.getInstance().getPackages(new ShellOutputReceiver(null, results -> addPackagesFromShellResult(results)));
+        AdbWrapper.getInstance().getPackages(new ShellOutputReceiver(null, results -> {
+            addPackagesFromShellResult(results);
+            setActivePackage();
+
+        }));
+
     }
 
     private void addPackagesFromShellResult(String[] results)
@@ -128,7 +154,11 @@ public class ADBFrame extends javax.swing.JFrame
             public <T> void onCommandResult(T result)
             {
                 _activePackage = (AndroidPackage) result;
-                runInEventThread(() -> _activePackageName.setText(_activePackage.getName()), false);
+                runInEventThread(() ->
+                {
+                    _packagesCombobox.setSelectedItem(_activePackage.getName());
+                    _activePackageName.setText(_activePackage.getName());
+                }, false);
             }
         });
     }
@@ -136,15 +166,21 @@ public class ADBFrame extends javax.swing.JFrame
     private void onDeviceChanged()
     {
         refreshPackages();
-        setActivePackage();
+     //   setActivePackage();
     }
 
     private void setActions()
     {
-        _save.addActionListener(event->
-        {
+        _packagesCombobox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                   getPackagePid();
+            }
+        });
+        _save.addActionListener(event -> {
             String filename = openSaveLogToFileDialog();
-            if(filename == null) return;
+            if (filename == null) return;
 
             PrintWriter out = null;
             try
@@ -155,10 +191,9 @@ public class ADBFrame extends javax.swing.JFrame
             {
                 e.printStackTrace();
             }
-            if(out == null)
-                return;
+            if (out == null) return;
             DefaultListModel<LogcatItem> itemList = ((LogcatTableModel) _logcatTable.getModel()).getItemList();
-            for(Object item :itemList.toArray())
+            for (Object item : itemList.toArray())
             {
                 String logcatString = ((LogcatItem) item).getLogcatString();
                 out.println(logcatString);
@@ -175,7 +210,7 @@ public class ADBFrame extends javax.swing.JFrame
 
         _devices.addActionListener(event -> {
             Device selectedItem = (Device) _devices.getSelectedItem();
-         //   Util.DbgLog("Selected device changed: " + selectedItem == null ? "no devices" : selectedItem.toString());
+            //   Util.DbgLog("Selected device changed: " + selectedItem == null ? "no devices" : selectedItem.toString());
             AdbWrapper.getInstance().setDevice(selectedItem);
             onDeviceChanged();
         });
@@ -239,7 +274,8 @@ public class ADBFrame extends javax.swing.JFrame
     }
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
-    private void initComponents() {
+    private void initComponents()
+    {
 
         _rigthPanel = new javax.swing.JPanel();
         _installAPKButoon = new javax.swing.JButton();
@@ -279,53 +315,20 @@ public class ADBFrame extends javax.swing.JFrame
 
         javax.swing.GroupLayout _rigthPanelLayout = new javax.swing.GroupLayout(_rigthPanel);
         _rigthPanel.setLayout(_rigthPanelLayout);
-        _rigthPanelLayout.setHorizontalGroup(
-                _rigthPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(_installAPKButoon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(_restatADBServer, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE)
-                        .addComponent(_clearAppData, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(_sendTextButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        _rigthPanelLayout.setVerticalGroup(
-                _rigthPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(_rigthPanelLayout.createSequentialGroup()
-                                .addComponent(_restatADBServer)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(_installAPKButoon)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(_clearAppData)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(_sendTextButton)
-                                .addContainerGap(490, Short.MAX_VALUE))
-        );
+        _rigthPanelLayout.setHorizontalGroup(_rigthPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(_installAPKButoon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addComponent(_restatADBServer, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE).addComponent(_clearAppData, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addComponent(_sendTextButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
+        _rigthPanelLayout.setVerticalGroup(_rigthPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(_rigthPanelLayout.createSequentialGroup().addComponent(_restatADBServer).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(_installAPKButoon).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(_clearAppData).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(_sendTextButton).addContainerGap(490, Short.MAX_VALUE)));
 
         _centerPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Logcat"));
 
         scrollPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        _logcatTable.setModel(new javax.swing.table.DefaultTableModel(
-                new Object [][] {
-                        {null, null, null, null},
-                        {null, null, null, null},
-                        {null, null, null, null},
-                        {null, null, null, null}
-                },
-                new String [] {
-                        "Title 1", "Title 2", "Title 3", "Title 4"
-                }
-        ));
+        _logcatTable.setModel(new javax.swing.table.DefaultTableModel(new Object[][]{{null, null, null, null}, {null, null, null, null}, {null, null, null, null}, {null, null, null, null}}, new String[]{"Title 1", "Title 2", "Title 3", "Title 4"}));
         scrollPanel.setViewportView(_logcatTable);
 
         javax.swing.GroupLayout _topPanleLayout = new javax.swing.GroupLayout(_topPanle);
         _topPanle.setLayout(_topPanleLayout);
-        _topPanleLayout.setHorizontalGroup(
-                _topPanleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 576, Short.MAX_VALUE)
-        );
-        _topPanleLayout.setVerticalGroup(
-                _topPanleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 77, Short.MAX_VALUE)
-        );
+        _topPanleLayout.setHorizontalGroup(_topPanleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 576, Short.MAX_VALUE));
+        _topPanleLayout.setVerticalGroup(_topPanleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 77, Short.MAX_VALUE));
 
         jLabel1.setText("Log level:");
 
@@ -352,113 +355,29 @@ public class ADBFrame extends javax.swing.JFrame
 
         jLabel2.setText("Select package:");
 
-        _packagesCombobox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        _packagesCombobox.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Item 1", "Item 2", "Item 3", "Item 4"}));
 
-        _devices.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        _devices.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Item 1", "Item 2", "Item 3", "Item 4"}));
 
         jLabel5.setText("Devices:");
 
         javax.swing.GroupLayout _centerPanelLayout = new javax.swing.GroupLayout(_centerPanel);
         _centerPanel.setLayout(_centerPanelLayout);
-        _centerPanelLayout.setHorizontalGroup(
-                _centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(scrollPanel)
-                        .addGroup(_centerPanelLayout.createSequentialGroup()
-                                .addGap(4, 4, 4)
-                                .addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(_centerPanelLayout.createSequentialGroup()
-                                                .addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                        .addComponent(jLabel1)
-                                                        .addComponent(jLabel3))
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                        .addComponent(_filterTextBox)
-                                                        .addComponent(_logcatLevelComboBox, 0, 264, Short.MAX_VALUE)))
-                                        .addGroup(_centerPanelLayout.createSequentialGroup()
-                                                .addComponent(jLabel4)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(_activePackageName)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jLabel2)
-                                        .addComponent(jLabel5))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                        .addComponent(_devices, 0, 299, Short.MAX_VALUE)
-                                        .addComponent(_packagesCombobox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(_topPanle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(_startLogcat, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(_clearLogcatButton, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(_save, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
-        _centerPanelLayout.setVerticalGroup(
-                _centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, _centerPanelLayout.createSequentialGroup()
-                                .addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                        .addComponent(_topPanle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGroup(_centerPanelLayout.createSequentialGroup()
-                                                .addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                                        .addComponent(jLabel4)
-                                                        .addComponent(_activePackageName))
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                                        .addComponent(jLabel1)
-                                                        .addComponent(_logcatLevelComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(_devices, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(jLabel5))
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                                        .addComponent(jLabel3)
-                                                        .addComponent(_filterTextBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(jLabel2)
-                                                        .addComponent(_packagesCombobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                        .addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                                .addComponent(_clearLogcatButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(_startLogcat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(_save, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(scrollPanel))
-        );
+        _centerPanelLayout.setHorizontalGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(scrollPanel).addGroup(_centerPanelLayout.createSequentialGroup().addGap(4, 4, 4).addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(_centerPanelLayout.createSequentialGroup().addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(jLabel1).addComponent(jLabel3)).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(_filterTextBox).addComponent(_logcatLevelComboBox, 0, 264, Short.MAX_VALUE))).addGroup(_centerPanelLayout.createSequentialGroup().addComponent(jLabel4).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(_activePackageName))).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(jLabel2).addComponent(jLabel5)).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false).addComponent(_devices, 0, 299, Short.MAX_VALUE).addComponent(_packagesCombobox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addComponent(_topPanle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(_startLogcat, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED).addComponent(_clearLogcatButton, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(_save, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)));
+        _centerPanelLayout.setVerticalGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(javax.swing.GroupLayout.Alignment.TRAILING, _centerPanelLayout.createSequentialGroup().addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING).addComponent(_topPanle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE).addGroup(_centerPanelLayout.createSequentialGroup().addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE).addComponent(jLabel4).addComponent(_activePackageName)).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE).addComponent(jLabel1).addComponent(_logcatLevelComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE).addComponent(_devices, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE).addComponent(jLabel5)).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE).addComponent(jLabel3).addComponent(_filterTextBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE).addComponent(jLabel2).addComponent(_packagesCombobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))).addGroup(_centerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE).addComponent(_clearLogcatButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE).addComponent(_startLogcat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE).addComponent(_save, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(scrollPanel)));
 
         javax.swing.GroupLayout _bottomPanelLayout = new javax.swing.GroupLayout(_bottomPanel);
         _bottomPanel.setLayout(_bottomPanelLayout);
-        _bottomPanelLayout.setHorizontalGroup(
-                _bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 0, Short.MAX_VALUE)
-        );
-        _bottomPanelLayout.setVerticalGroup(
-                _bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 22, Short.MAX_VALUE)
-        );
+        _bottomPanelLayout.setHorizontalGroup(_bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 0, Short.MAX_VALUE));
+        _bottomPanelLayout.setVerticalGroup(_bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 22, Short.MAX_VALUE));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(_bottomPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createSequentialGroup()
-                                .addComponent(_centerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(_rigthPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(_rigthPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(_centerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(_bottomPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
+        layout.setHorizontalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(_bottomPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addGroup(layout.createSequentialGroup().addComponent(_centerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(_rigthPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap()));
+        layout.setVerticalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(_rigthPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addComponent(_centerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(_bottomPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)));
 
         pack();
     }// </editor-fold>
-
 
 
     public static void showAdbFrame()

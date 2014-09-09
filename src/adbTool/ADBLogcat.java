@@ -14,11 +14,12 @@ public class ADBLogcat
 
     private static ADBLogcat _instance;
     private LogcatLevel _logcatLevel = LogcatLevel.Debug;
-    ShellOutputReceiver mLogcatReceiver;
+    ShellOutputReceiver _logcatReceiver;
+    private String _logcatPidFilter;
 
     private void initReceiver()
     {
-        mLogcatReceiver = new ShellOutputReceiver(null, results -> {
+        _logcatReceiver = new ShellOutputReceiver(null, results -> {
             if (results != null && results.length != 0)
             {
                 for (String s : results)
@@ -128,7 +129,7 @@ public class ADBLogcat
     private void startLogcat(String... args)
     {
         initReceiver();
-        AdbWrapper.getInstance().executeShellCommand(mLogcatReceiver, args);
+        AdbWrapper.getInstance().executeShellCommand(_logcatReceiver, args);
 //        String[] commands = new String[args.length + 1];
 //        commands[0] = "logcat";
 //        int i = 1;
@@ -145,5 +146,10 @@ public class ADBLogcat
     {
         _logcatLevel = level;
         startLogcat();
+    }
+
+    public void setLogcatPidFilter(String logcatPidFilter)
+    {
+        _logcatReceiver.setFilter(logcatPidFilter);
     }
 }

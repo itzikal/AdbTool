@@ -1,10 +1,9 @@
 package adbTool.models;
 
 import com.android.ddmlib.IDevice;
+import com.android.ddmlib.IShellOutputReceiver;
 
 import java.io.IOException;
-
-import adbTool.core.AdbWrapper;
 
 /**
  * Created by Itzik on 31/08/2014.
@@ -102,7 +101,7 @@ public class Device
             e.printStackTrace();
         }
     }
-    public boolean executeShellCommand(String shellCmd, AdbWrapper.ShellOutputReceiver receiver, int i)
+    public boolean executeShellCommand(String shellCmd, IShellOutputReceiver receiver, int i)
     {
         try
         {
