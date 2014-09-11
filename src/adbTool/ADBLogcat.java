@@ -24,6 +24,8 @@ public class ADBLogcat
             {
                 for (String s : results)
                 {
+                    if(s.isEmpty()) continue;
+
                     LogcatItem item = new LogcatItem(s);
                     _listChangeListener.itemAdded(item);
                 }
@@ -33,6 +35,7 @@ public class ADBLogcat
 
     protected ADBLogcat()
     {
+        initReceiver();
     }
 
     public static ADBLogcat getInstance()
@@ -47,7 +50,7 @@ public class ADBLogcat
     public void startLogcat()
     {
         close();
-        startLogcat("logcat","*:" + _logcatLevel.getLetter());
+        startLogcat("logcat", "*:" + _logcatLevel.getLetter());
 //        _process = executeLogcatCommand("*:" + _logcatLevel.getLetter());// + " |grep " + ADBWrapper.getInstance().mPid);
 //        _logcatThread = new Thread(() -> {
 //            while (true)
@@ -128,7 +131,7 @@ public class ADBLogcat
 
     private void startLogcat(String... args)
     {
-        initReceiver();
+
         AdbWrapper.getInstance().executeShellCommand(_logcatReceiver, args);
 //        String[] commands = new String[args.length + 1];
 //        commands[0] = "logcat";

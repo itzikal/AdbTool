@@ -18,6 +18,7 @@ import javax.swing.event.DocumentListener;
 import adbTool.ADBLogcat;
 import adbTool.core.AdbWrapper;
 import adbTool.core.ShellOutputReceiver;
+import adbTool.core.Util;
 import adbTool.models.AndroidPackage;
 import adbTool.models.Device;
 import adbTool.models.LogcatItem;
@@ -48,9 +49,9 @@ public class ADBFrame extends javax.swing.JFrame
         AdbWrapper.getInstance().connect(" ", new AdbWrapper.DeviceConnectionListener()
         {
             @Override
-            public void deviceConnected(Device device)
+            public void deviceConnected(Device deviceModel)
             {
-                runInEventThread(() -> _devices.addItem(device), true);
+                runInEventThread(() -> _devices.addItem(deviceModel), true);
             }
 
             @Override
@@ -76,7 +77,8 @@ public class ADBFrame extends javax.swing.JFrame
             @Override
             public void deviceChanged(Device deviceModel)
             {
-                _devices.setRequestFocusEnabled(true);
+                onDeviceChanged();
+           //     _devices.setRequestFocusEnabled(true);
                 //_devices.contentsChanged(new ListDataEvent(_devices.getSelectedItem(), 0,0, _devices.getItemCount()));
             }
         });
@@ -86,19 +88,18 @@ public class ADBFrame extends javax.swing.JFrame
     private void getPackagePid()
     {
         AdbWrapper.getInstance().getPidForPackage((String) _packagesCombobox.getSelectedItem(), results -> {
-            _packagePid = null;
-            if (results.length == 0)
-                    {
-                        return;
-                    }
-            String[] split = results[0].split(" ");
-            if(split.length > 3)
+            if (results.length != 0)
             {
-                _packagePid = split[3];
+                _packagePid = null;
+                String[] split = results[0].split(" ");
+                if (split.length > 3)
+                {
+                    _packagePid = split[3];
+                    Util.DbgLog("pid set to " + _packagePid);
+                    ADBLogcat.getInstance().setLogcatPidFilter(_packagePid);
+                }
             }
-
-            ADBLogcat.getInstance().setLogcatPidFilter(_packagePid);
-                });
+        });
     }
 
     private void runInEventThread(Runnable r, boolean isSynchronous)
