@@ -19,7 +19,8 @@ public class LogcatTableModel extends AbstractTableModel implements OnListChange
 	
 	public LogcatTableModel()
 	{
-		ADBLogcat.getInstance().setOnListChangeListener(this);
+        ADBLogcat.init(this);
+		//ADBLogcat.getInstance().setOnListChangeListener(this);
 	}
 	
 	@Override

@@ -83,6 +83,7 @@ public class ADBFrame extends javax.swing.JFrame
             }
         });
 
+    //    ADBLogcat.init();
     }
 
     private void getPackagePid()
@@ -169,6 +170,7 @@ public class ADBFrame extends javax.swing.JFrame
     private void onDeviceChanged()
     {
         refreshPackages();
+        ADBLogcat.getInstance().start();
      //   setActivePackage();
     }
 
@@ -203,7 +205,7 @@ public class ADBFrame extends javax.swing.JFrame
             }
         });
         _devices.removeAllItems();
-        _startLogcat.addActionListener(arg0 -> ADBLogcat.getInstance().startLogcat());
+        //_startLogcat.addActionListener(arg0 -> ADBLogcat.getInstance().startLogcat());
 
         _logcatLevelComboBox.addActionListener(arg0 -> {
             LogcatLevel x = (LogcatLevel) _logcatLevelComboBox.getSelectedItem();

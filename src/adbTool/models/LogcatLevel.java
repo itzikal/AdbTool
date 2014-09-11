@@ -4,22 +4,25 @@ import java.awt.Color;
 
 public enum LogcatLevel 
 {
-	Verbose ("Verbose", 'V', Color.GREEN),
-	Debug ("Debut", 'D', Color.MAGENTA),
-	Info ("Info", 'I', Color.BLUE),
-	Warnning ("Warnning", 'W', Color.CYAN),
-	Error ("Error", 'E', Color.RED),
-	Asset ("Asset", 'A', Color.BLACK),
-	Unknown("", ' ', Color.GRAY);
+	Verbose ("Verbose", 'V', Color.GREEN, 0),
+	Debug ("Debut", 'D', Color.MAGENTA, 1),
+	Info ("Info", 'I', Color.BLUE, 2),
+	Warnning ("Warnning", 'W', Color.CYAN, 3),
+	Error ("Error", 'E', Color.RED, 4),
+	Asset ("Asset", 'A', Color.BLACK, 5),
+	Unknown("", ' ', Color.GRAY, -1);
 
 	private String _name;
 	private char _letter;
 	private Color _color;
-	LogcatLevel(String name, char logcatLetter, Color color)
+    private int _value;
+
+	LogcatLevel(String name, char logcatLetter, Color color, int value)
 	{
 		_name = name;
 		_letter = logcatLetter;
 		_color = color;
+        _value = value;
 	}
 	
 	public String getName()
@@ -31,7 +34,11 @@ public enum LogcatLevel
 	{
 		return _letter;
 	}
-	
+
+    public int getValue()
+    {
+        return _value;
+    }
 //
 //	public static LogcatLevel convert(String name)
 //	{

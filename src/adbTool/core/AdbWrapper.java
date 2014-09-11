@@ -48,7 +48,7 @@ public class AdbWrapper
         executeShellCommand(reciver, "pm", "list", "packages", "-3", "-e");
     }
 
-    public void executeShellCommand(ShellOutputReceiver reciver, String... args)
+    public void executeShellCommand(IShellOutputReceiver reciver, String... args)
     {
         StringBuilder sb = new StringBuilder();
 
