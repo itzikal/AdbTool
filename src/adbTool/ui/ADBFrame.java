@@ -1,5 +1,6 @@
 package adbTool.ui;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -35,7 +36,8 @@ public class ADBFrame extends javax.swing.JFrame
     public ADBFrame()
     {
         _logcatLevelComboBox = new JComboBox<LogcatLevel>(LogcatLevel.getValues());
-
+//        ImageIcon img = new ImageIcon()
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("Resource/paw.png")));
         initComponents();
         setActions();
         //refreshDeviceList();
