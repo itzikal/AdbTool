@@ -104,10 +104,9 @@ public class ShellOutputReceiver implements IShellOutputReceiver
                     {
                         line = line.trim();
                     }
-                    Util.DbgLog("filter : " + _filter);
+
                     if(_filter == null || line.contains(_filter))
                     {
-                      Util.DbgLog("line add " + line);
                         mArray.add(line);
                     }
 
@@ -160,7 +159,6 @@ public class ShellOutputReceiver implements IShellOutputReceiver
     {
         if( _shellOutputReceiverResults != null)
         {
-            Util.DbgLog("sending :" +lines.length+" lines" );
             _shellOutputReceiverResults.onResultReceived(lines);
         }
     }

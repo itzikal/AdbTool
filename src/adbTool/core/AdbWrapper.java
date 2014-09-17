@@ -22,6 +22,7 @@ import com.android.ddmlib.AndroidDebugBridge.IDeviceChangeListener;
 import com.android.ddmlib.Client;
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.IShellOutputReceiver;
+import com.android.ddmlib.NullOutputReceiver;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -109,6 +110,14 @@ public class AdbWrapper
     public Device getActiveDevice()
     {
         return mDevice;
+    }
+
+    public void uninstallAPK(String apk)
+    {
+        if(mDevice !=null)
+        {
+            executeShellCommand(new NullOutputReceiver(), "pm", "uninstall", apk);
+        }
     }
 
     /**

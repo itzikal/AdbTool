@@ -11,6 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -229,9 +230,22 @@ public class ADBFrame extends javax.swing.JFrame
         _clearAppData.addActionListener(arg -> {
             String selectedValue = (String) _packagesCombobox.getSelectedItem();
             if (selectedValue == null) return;
-            AdbWrapper.getInstance().clearAppData(selectedValue);
+            int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to clear '" + selectedValue +"' app data?", "Warning", JOptionPane.OK_CANCEL_OPTION);
+            if(dialogResult == JOptionPane.YES_OPTION)
+            {
+                AdbWrapper.getInstance().clearAppData(selectedValue);
+            }
         });
 
+        _uninstallAPK.addActionListener(arg->{
+            String selectedValue = (String) _packagesCombobox.getSelectedItem();
+            if (selectedValue == null) return;
+            int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to remove '" + selectedValue +"' ?", "Warning", JOptionPane.OK_CANCEL_OPTION);
+            if(dialogResult == JOptionPane.YES_OPTION)
+            {
+                AdbWrapper.getInstance().uninstallAPK(selectedValue);
+            }
+        });
 
         _filterTextBox.addActionListener(evt -> filterTextBoxActionPerformed(evt));
 
@@ -286,6 +300,7 @@ public class ADBFrame extends javax.swing.JFrame
         _installAPKButoon = new javax.swing.JButton();
         _restatADBServer = new javax.swing.JButton();
         _clearAppData = new javax.swing.JButton();
+        _uninstallAPK= new javax.swing.JButton();
         _sendTextButton = new javax.swing.JButton();
         _centerPanel = new javax.swing.JPanel();
         scrollPanel = new javax.swing.JScrollPane();
@@ -315,13 +330,13 @@ public class ADBFrame extends javax.swing.JFrame
         _restatADBServer.setToolTipText("");
 
         _clearAppData.setText("Clear app data");
-
+        _uninstallAPK.setText("Remove Apk");
         _sendTextButton.setText("Send Text");
 
         javax.swing.GroupLayout _rigthPanelLayout = new javax.swing.GroupLayout(_rigthPanel);
         _rigthPanel.setLayout(_rigthPanelLayout);
-        _rigthPanelLayout.setHorizontalGroup(_rigthPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(_installAPKButoon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addComponent(_restatADBServer, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE).addComponent(_clearAppData, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addComponent(_sendTextButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
-        _rigthPanelLayout.setVerticalGroup(_rigthPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(_rigthPanelLayout.createSequentialGroup().addComponent(_restatADBServer).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(_installAPKButoon).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(_clearAppData).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(_sendTextButton).addContainerGap(490, Short.MAX_VALUE)));
+        _rigthPanelLayout.setHorizontalGroup(_rigthPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(_installAPKButoon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addComponent(_uninstallAPK, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addComponent(_restatADBServer, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE).addComponent(_clearAppData, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addComponent(_sendTextButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
+        _rigthPanelLayout.setVerticalGroup(_rigthPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(_rigthPanelLayout.createSequentialGroup().addComponent(_restatADBServer).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(_installAPKButoon).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(_uninstallAPK).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(_clearAppData).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(_sendTextButton).addContainerGap(490, Short.MAX_VALUE)));
 
         _centerPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Logcat"));
 
@@ -436,6 +451,7 @@ public class ADBFrame extends javax.swing.JFrame
     private javax.swing.JPanel _bottomPanel;
     private javax.swing.JPanel _centerPanel;
     private javax.swing.JButton _clearAppData;
+    private javax.swing.JButton _uninstallAPK;
     private javax.swing.JButton _clearLogcatButton;
     private javax.swing.JComboBox _devices;
     private javax.swing.JTextField _filterTextBox;

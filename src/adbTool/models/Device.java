@@ -116,4 +116,15 @@ public class Device
     }
 
 
+    public void removeAPK(String apk)
+    {
+        try
+        {
+            _device.removeRemotePackage(apk);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
 }
