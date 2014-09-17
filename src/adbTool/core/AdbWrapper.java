@@ -23,6 +23,8 @@ import com.android.ddmlib.Client;
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.IShellOutputReceiver;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -165,7 +167,6 @@ public class AdbWrapper
         //            Util.DbgLog("Error occured in setting adb binary file path");
         //            return false;
         //        }
-
         if (mIsAdbInitialized)
         {
             Util.DbgLog("Already connected..");
@@ -173,16 +174,25 @@ public class AdbWrapper
         }
 
         mDeviceStateListener = listener;
-
+       String adb = getAdbLocation() +"\\adb.exe";
+        Util.DbgLog("Adb will run from "+ adb);
         AndroidDebugBridge.init(false /* no need to support debug*/);
         AndroidDebugBridge.addClientChangeListener(mClientChangeListener);
         AndroidDebugBridge.addDeviceChangeListener(mDeviceChangeListener);
 
-        AndroidDebugBridge.createBridge();//adbFilePath true);
+        AndroidDebugBridge.createBridge(adb, true);//adbFilePath true);
 
         //adbFilePath, true /* forceNewBridge */);
         mIsAdbInitialized = true;
         return true;
+    }
+
+    private String getAdbLocation()
+    {
+        Path currentRelativePath = Paths.get("");
+        String s = currentRelativePath.toAbsolutePath().toString();
+        System.out.println("Current relative path is: " + s);
+        return s;
     }
 
     public void disconnect()

@@ -45,7 +45,7 @@ public class ADBFrame extends javax.swing.JFrame
 
         //        setActivePackage();
         _packagesCombobox.setModel(_sortedPackageCombobox);
-
+   //     ADBWrapper.getInstance().restartServer();
         AdbWrapper.getInstance().connect(" ", new AdbWrapper.DeviceConnectionListener()
         {
             @Override
@@ -129,7 +129,7 @@ public class ADBFrame extends javax.swing.JFrame
         _sortedPackageCombobox.clear();
         AdbWrapper.getInstance().getPackages(new ShellOutputReceiver(null, results -> {
             addPackagesFromShellResult(results);
-            setActivePackage();
+          //  setActivePackage();
 
         }));
 
@@ -170,7 +170,7 @@ public class ADBFrame extends javax.swing.JFrame
     private void onDeviceChanged()
     {
         refreshPackages();
-        ADBLogcat.getInstance().start();
+     //   ADBLogcat.getInstance().start();
      //   setActivePackage();
     }
 
@@ -205,7 +205,7 @@ public class ADBFrame extends javax.swing.JFrame
             }
         });
         _devices.removeAllItems();
-        //_startLogcat.addActionListener(arg0 -> ADBLogcat.getInstance().startLogcat());
+        _startLogcat.addActionListener(arg0 -> ADBLogcat.getInstance().start());
 
         _logcatLevelComboBox.addActionListener(arg0 -> {
             LogcatLevel x = (LogcatLevel) _logcatLevelComboBox.getSelectedItem();
@@ -327,7 +327,7 @@ public class ADBFrame extends javax.swing.JFrame
 
         scrollPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        _logcatTable.setModel(new javax.swing.table.DefaultTableModel(new Object[][]{{null, null, null, null}, {null, null, null, null}, {null, null, null, null}, {null, null, null, null}}, new String[]{"Title 1", "Title 2", "Title 3", "Title 4"}));
+       // _logcatTable.setModel(new javax.swing.table.DefaultTableModel(new Object[][]{{null, null, null, null}, {null, null, null, null}, {null, null, null, null}, {null, null, null, null}}, new String[]{"Title 1", "Title 2", "Title 3", "Title 4"}));
         scrollPanel.setViewportView(_logcatTable);
 
         javax.swing.GroupLayout _topPanleLayout = new javax.swing.GroupLayout(_topPanle);
