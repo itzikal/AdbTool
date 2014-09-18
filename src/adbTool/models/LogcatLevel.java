@@ -4,10 +4,10 @@ import java.awt.Color;
 
 public enum LogcatLevel 
 {
-	Verbose ("Verbose", 'V', Color.GREEN, 0),
-	Debug ("Debut", 'D', Color.MAGENTA, 1),
+	Verbose ("Verbose", 'V', Color.GRAY, 0),
+	Debug ("Debut", 'D', Color.BLACK, 1),
 	Info ("Info", 'I', Color.BLUE, 2),
-	Warnning ("Warnning", 'W', Color.CYAN, 3),
+	Warnning ("Warnning", 'W', Color.MAGENTA, 3),
 	Error ("Error", 'E', Color.RED, 4),
 	Asset ("Asset", 'A', Color.BLACK, 5),
 	Unknown("", ' ', Color.GRAY, -1);
