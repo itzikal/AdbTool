@@ -67,7 +67,7 @@ public class LogcatTableModel extends AbstractTableModel implements OnListChange
 	public void itemAdded(LogcatItem item) 
 	{
 		_logcatList.addElement(item);
-		fireTableRowsInserted(0,getRowCount());
+		fireTableRowsInserted(getRowCount()-1, getRowCount()-1);
 	}
 
 	@Override
