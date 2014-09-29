@@ -273,6 +273,18 @@ public class ADBFrame extends javax.swing.JFrame
         });
 
         _sendTextButton.addActionListener(arg0 -> new SendTextDialog(ADBFrame.this, true).run());
+
+        scrollPanel.getVerticalScrollBar().addAdjustmentListener(e -> {
+            if (e.getValueIsAdjusting())
+            {
+                Util.DbgLog("Scrollbar is value changed");
+                _logcatTable.setAutoScroll(false);
+                Util.DbgLog("event value: " + e.getValue() + " Scroll value: " + scrollPanel.getVerticalScrollBar().getValue());
+
+
+                return;
+            }
+        });
     }
 
     private String openSaveLogToFileDialog()
