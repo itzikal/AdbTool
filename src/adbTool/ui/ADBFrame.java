@@ -411,7 +411,6 @@ public class ADBFrame extends javax.swing.JFrame
         pack();
     }// </editor-fold>
 
-
     public static void showAdbFrame()
     {
         /* Set the Nimbus look and feel */

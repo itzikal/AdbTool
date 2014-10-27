@@ -189,7 +189,7 @@ public class AdbWrapper
         AndroidDebugBridge.addClientChangeListener(mClientChangeListener);
         AndroidDebugBridge.addDeviceChangeListener(mDeviceChangeListener);
 
-        AndroidDebugBridge.createBridge(adb, true);//adbFilePath true);
+        AndroidDebugBridge.createBridge();//adb, true);//adbFilePath true);
 
         //adbFilePath, true /* forceNewBridge */);
         mIsAdbInitialized = true;

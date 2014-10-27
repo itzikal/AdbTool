@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact build-on-make="true" name="ADBTool:AndroidDebuggingTool">
+    <output-path>C:/Share/AndroidDebuggingTool</output-path>
+    <root id="root">
+      <element id="archive" name="AndroidDebuggingTool.jar">
+        <element id="module-output" name="ADBTool" />
+      </element>
+      <element id="library" level="project" name="ddmlib" />
+      <element id="file-copy" path="$PROJECT_DIR$/adb.exe" />
+      <element id="file-copy" path="$PROJECT_DIR$/AdbWinApi.dll" />
+      <element id="file-copy" path="$PROJECT_DIR$/AdbWinUsbApi.dll" />
+    </root>
+  </artifact>
+</component>
